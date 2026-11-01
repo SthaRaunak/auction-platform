@@ -1,0 +1,16 @@
+{
+  "name": "bidwell",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter @bidwell/api --filter @bidwell/web dev",
+    "build": "pnpm -r build",
+    "test": "pnpm --filter @bidwell/api test",
+    "typecheck": "pnpm -r typecheck",
+    "db:generate": "pnpm --filter @bidwell/api db:generate",
+    "db:migrate": "pnpm --filter @bidwell/api db:migrate",
+    "db:studio": "pnpm --filter @bidwell/api db:studio",
+    "db:seed": "pnpm --filter @bidwell/api db:seed"
+  }
+}
