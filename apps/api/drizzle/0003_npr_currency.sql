@@ -1,0 +1,1 @@
+ALTER TABLE "auctions" ALTER COLUMN "currency" SET DEFAULT 'NPR';
