@@ -63,7 +63,7 @@ function filtersFor(q: ListAuctionsQuery, opts: { skipBrand?: boolean } = {}): S
   const where: SQL[] = [visibleLive()!];
   if (q.q) {
     const term = `%${q.q.replace(/[%_\\]/g, (c) => '\\' + c)}%`;
-    where.push(or(ilike(auctions.title, term), ilike(auctions.brand, term))!);
+    where.push(or(ilike(auctions.title, term), ilike(auctions.titleNe, term), ilike(auctions.brand, term))!);
   }
   if (q.category) where.push(eq(auctions.category, q.category));
   if (!opts.skipBrand && q.brand.length) where.push(inArray(auctions.brand, q.brand));

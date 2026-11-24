@@ -44,13 +44,13 @@ async function main() {
   // Sellers are disposing offices — divisions, municipalities, customs, forest offices.
   // `code` prefixes their auction (लिलाम) notice numbers, which run on the Bikram Sambat fiscal year.
   const sellers = {
-    roads: { user: await person('roads.pokhara@bidwell.test', 'Road Division Office, Pokhara'), city: 'Pokhara', code: 'RDO/PKR' },
-    transport: { user: await person('depot.kathmandu@bidwell.test', 'Metropolitan Transport Depot, Kathmandu'), city: 'Kathmandu', code: 'MTD/KTM' },
-    municipal: { user: await person('stores.lalitpur@bidwell.test', 'Lalitpur Metropolitan City, Stores Section'), city: 'Lalitpur', code: 'LMC/STR' },
-    customs: { user: await person('customs.birgunj@bidwell.test', 'Customs Office, Birgunj'), city: 'Birgunj', code: 'CO/BRG' },
-    forest: { user: await person('dfo.chitwan@bidwell.test', 'Division Forest Office, Chitwan'), city: 'Bharatpur', code: 'DFO/CTN' },
-    dao: { user: await person('dao.kaski@bidwell.test', 'District Administration Office, Kaski'), city: 'Pokhara', code: 'DAO/KSK' },
-    health: { user: await person('hospital.dhading@bidwell.test', 'District Hospital Stores, Dhading'), city: 'Dhading Besi', code: 'DH/DHD' },
+    roads: { user: await person('roads.pokhara@bidwell.test', 'Road Division Office, Pokhara'), city: 'Pokhara', cityNe: 'पोखरा', code: 'RDO/PKR' },
+    transport: { user: await person('depot.kathmandu@bidwell.test', 'Metropolitan Transport Depot, Kathmandu'), city: 'Kathmandu', cityNe: 'काठमाडौं', code: 'MTD/KTM' },
+    municipal: { user: await person('stores.lalitpur@bidwell.test', 'Lalitpur Metropolitan City, Stores Section'), city: 'Lalitpur', cityNe: 'ललितपुर', code: 'LMC/STR' },
+    customs: { user: await person('customs.birgunj@bidwell.test', 'Customs Office, Birgunj'), city: 'Birgunj', cityNe: 'वीरगञ्ज', code: 'CO/BRG' },
+    forest: { user: await person('dfo.chitwan@bidwell.test', 'Division Forest Office, Chitwan'), city: 'Bharatpur', cityNe: 'भरतपुर', code: 'DFO/CTN' },
+    dao: { user: await person('dao.kaski@bidwell.test', 'District Administration Office, Kaski'), city: 'Pokhara', cityNe: 'पोखरा', code: 'DAO/KSK' },
+    health: { user: await person('hospital.dhading@bidwell.test', 'District Hospital Stores, Dhading'), city: 'Dhading Besi', cityNe: 'धादिङबेसी', code: 'DH/DHD' },
   };
   // Bidders are VAT/PAN-registered firms and individual citizens.
   const bidders = await Promise.all(
@@ -75,6 +75,49 @@ async function main() {
     `Sold by public auction (lilam) on an “as is, where is” basis, under the applicable government financial procedure rules. Inspection on office days (Sunday–Friday), 10:00–15:00, at the ${city} premises with prior notice. ` +
     `The successful bidder must deposit the balance within 15 days of the sale decision and remove the lot within 15 days of payment, at their own cost and risk. ` +
     `VAT (13%) and other applicable taxes are payable by the buyer. A PAN/VAT registration certificate is required at handover.`;
+  const asIsNe = (city: string) =>
+    `यो लट प्रचलित सरकारी आर्थिक कार्यविधि नियमअनुसार “जस्तो छ, जहाँ छ” को आधारमा सार्वजनिक लिलामबाट बिक्री गरिनेछ। पूर्वसूचना दिई कार्यालय खुला रहने दिन (आइतबार–शुक्रबार) बिहान १०:०० देखि दिउँसो ३:०० बजेसम्म ${city} स्थित परिसरमा निरीक्षण गर्न सकिनेछ। ` +
+    `सफल बोलकर्ताले बिक्री निर्णय भएको १५ दिनभित्र बाँकी रकम जम्मा गर्नुपर्नेछ र भुक्तानी भएको १५ दिनभित्र आफ्नै खर्च र जोखिममा लट उठाइसक्नुपर्नेछ। ` +
+    `मूल्य अभिवृद्धि कर (१३%) तथा अन्य लागू हुने कर खरिदकर्ताले तिर्नुपर्नेछ। हस्तान्तरणका बेला स्थायी लेखा नम्बर (PAN/VAT) दर्ता प्रमाणपत्र अनिवार्य छ।`;
+
+  // Nepali titles, keyed by the English one. A few lots deliberately have none,
+  // to show the web app falling back to English.
+  const NEPALI_TITLES: Record<string, string> = {
+    'Toyota Hilux double cab (2010) — condemned project vehicle': 'टोयोटा हाइलक्स डबल क्याब (२०१०) — काम नलाग्ने परियोजना सवारी',
+    'Tata 1512 city buses (2008), lot of 3': 'टाटा १५१२ सिटी बस (२००८), ३ थान',
+    'Mahindra Bolero ambulance (2014)': 'महिन्द्रा बोलेरो एम्बुलेन्स (२०१४)',
+    'Unclaimed motorcycles, lot of 18': 'दाबी नआएका मोटरसाइकल, १८ थान',
+    'MS scrap from dismantled water tank, approx. 42 MT': 'भत्काइएको पानी ट्याङ्कीको एमएस स्क्र्याप, करिब ४२ मेट्रिक टन',
+    'Copper cable scrap, approx. 3.8 MT': 'तामाको केबल स्क्र्याप, करिब ३.८ मेट्रिक टन',
+    'Bailey bridge panels and fittings, approx. 120 MT': 'बेली पुलका प्यानल र फिटिङ्स, करिब १२० मेट्रिक टन',
+    'Desktop computers and monitors, 146 units': 'डेस्कटप कम्प्युटर र मनिटर, १४६ थान',
+    'Steel dafaar almirahs and filing cabinets, 64 pieces': 'स्टिलका दफ्तर दराज र फाइलिङ क्याबिनेट, ६४ थान',
+    'Sal-wood conference table with 24 chairs': 'सालको काठको सम्मेलन टेबल र २४ वटा कुर्सी',
+    'JCB 3DX backhoe loader (2011)': 'जेसीबी ३डीएक्स ब्याकहो लोडर (२०११)',
+    'Diesel generator set, 125 kVA': 'डिजेल जेनेरेटर सेट, १२५ केभीए',
+    'Static road roller, 10 tonne (condemned)': 'स्ट्याटिक रोड रोलर, १० टन (काम नलाग्ने)',
+    'Confiscated mobile phones, 210 units': 'जफत गरिएका मोबाइल फोन, २१० थान',
+    'Seized timur (Sichuan pepper), 1.2 MT': 'बरामद टिमुर, १.२ मेट्रिक टन',
+    'Commercial land, 4 ropani — 30-year lease': 'व्यावसायिक जग्गा, ४ रोपनी — ३० वर्षे लिजमा',
+    'Shop no. 14, municipal market complex — 10-year lease': 'नगर बजार कम्प्लेक्सको पसल नं. १४ — १० वर्षे भाडामा',
+    'Sal timber, 1,220 cu ft — depot lot 27': 'सालको काठ, १,२२० क्यू. फिट — डिपो लट नं. २७',
+    'Bamboo (tama bans), 12,000 culms': 'तामा बाँस, १२,००० थान',
+    'River materials (sand, gravel, boulders), 6,35,000 cu ft — FY 2083/84': 'नदीजन्य पदार्थ (बालुवा, गिट्टी, ढुङ्गा), ६,३५,००० क्यू. फिट — आ.व. २०८३/८४',
+    'Parking management contract, city bus park — 3 years': 'सिटी बसपार्कको पार्किङ व्यवस्थापन ठेक्का — ३ वर्ष',
+    'Hoarding board rights at 22 locations — 3 years': '२२ स्थानमा होर्डिङ बोर्ड राख्ने अधिकार — ३ वर्ष',
+    'Fish farming rights, community pond no. 7 — 5 years': 'सामुदायिक पोखरी नं. ७ मा माछापालन गर्ने अधिकार — ५ वर्ष',
+    'Orange harvest rights, government farm (380 trees) — 2083 season': 'सरकारी फार्मको सुन्तला टिप्ने अधिकार (३८० बोट) — २०८३ सिजन',
+    'Damaged rice stock, 64 MT (feed grade)': 'क्षतिग्रस्त चामल मौज्दात, ६४ मेट्रिक टन (पशु आहार ग्रेड)',
+    'Mahindra Scorpio (2009), condemned': 'महिन्द्रा स्कर्पियो (२००९), काम नलाग्ने',
+    'Aluminium scrap, approx. 6.2 MT': 'एल्मुनियम स्क्र्याप, करिब ६.२ मेट्रिक टन',
+    'Office chairs, 140 pieces': 'कार्यालयका कुर्सी, १४० थान',
+    'Khayer (catechu) logs, 410 cu ft': 'खयरका मुढा, ४१० क्यू. फिट',
+    'Tata Sumo (2007), condemned': 'टाटा सुमो (२००७), काम नलाग्ने',
+    'Confiscated LED televisions, 46 units': 'जफत गरिएका एलईडी टेलिभिजन, ४६ थान',
+    'Hospital beds (manual), 30 units': 'अस्पतालका बेड (म्यानुअल), ३० थान',
+  };
+  const nepali = (title: string, city: string) =>
+    NEPALI_TITLES[title] ? { titleNe: NEPALI_TITLES[title], descriptionNe: asIsNe(city) } : {};
 
   const lots: Lot[] = [
     // Vehicles
@@ -184,6 +227,7 @@ async function main() {
     const { seller: _s, photo, endsInMin, maxes, qty, extraSpecs, ...input } = lot;
     const a = await createAuction(seller.user, {
       description: asIs(seller.city),
+      ...nepali(lot.title, seller.cityNe),
       images: [],
       delivery: 'local_pickup',
       location: seller.city,
@@ -227,7 +271,7 @@ async function main() {
   for (const [seller, title, category, max, winner, sellerStars, sellerReview, buyerStars, buyerReview, photo] of completed) {
     const dept = sellers[seller];
     const a = await createAuction(dept.user, {
-      title, category, condition: 'fair', description: asIs(dept.city), images: [], delivery: 'local_pickup',
+      title, category, condition: 'fair', description: asIs(dept.city), ...nepali(title, dept.cityNe), images: [], delivery: 'local_pickup',
       specs: [{ label: 'Notice no.', value: `${dept.code}/Lilam/2083-84/${String(++notice).padStart(3, '0')}` }],
       location: dept.city, startPrice: rupees(Math.round(max * 0.7)), endsAt: inMinutes(30),
     } as AuctionCreateInput);

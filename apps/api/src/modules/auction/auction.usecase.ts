@@ -84,6 +84,7 @@ export async function toCards(rows: AuctionRow[], viewerId: string | null): Prom
     id: r.id,
     lotNo: r.lotNo,
     title: r.title,
+    titleNe: r.titleNe,
     category: r.category,
     brand: r.brand,
     condition: r.condition,
@@ -218,7 +219,9 @@ export async function createAuction(user: UserRow, input: AuctionCreateInput) {
   const row: NewAuction = {
     sellerId: user.id,
     title: input.title,
+    titleNe: input.titleNe?.trim() || null,
     description: input.description,
+    descriptionNe: input.descriptionNe?.trim() || null,
     category: input.category,
     brand: input.brand || null,
     condition: input.condition,
@@ -260,6 +263,9 @@ export async function updateAuction(user: UserRow, auctionId: string, patch: Auc
     if (patch.startsAt !== undefined) next.startsAt = new Date(patch.startsAt);
     if (patch.endsAt !== undefined) next.endsAt = new Date(patch.endsAt);
     if (patch.brand !== undefined) next.brand = patch.brand || null;
+    // Blank Nepali text means "none", so clients fall back to English.
+    if (patch.titleNe !== undefined) next.titleNe = patch.titleNe?.trim() || null;
+    if (patch.descriptionNe !== undefined) next.descriptionNe = patch.descriptionNe?.trim() || null;
 
     const changes = Object.entries(next)
       .filter(([field, to]) => field in current && comparable(current[field as keyof AuctionRow]) !== comparable(to))

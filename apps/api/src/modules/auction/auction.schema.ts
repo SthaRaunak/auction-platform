@@ -35,7 +35,10 @@ export const auctions = pgTable(
       .references(() => users.id),
 
     title: text().notNull(),
+    /** Optional Nepali title and description; the web app falls back to English. */
+    titleNe: text(),
     description: text().notNull().default(''),
+    descriptionNe: text(),
     category: text().notNull(),
     brand: text(),
     condition: conditionEnum().notNull(),

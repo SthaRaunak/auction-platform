@@ -19,7 +19,7 @@ export async function findReviewBy(ex: Executor, auctionId: string, reviewerId: 
 
 export function reviewsReceivedRows(ex: Executor, userId: string) {
   return ex
-    .select({ review: reviews, auctionTitle: auctions.title, lotNo: auctions.lotNo, reviewerName: users.displayName })
+    .select({ review: reviews, auctionTitle: auctions.title, auctionTitleNe: auctions.titleNe, lotNo: auctions.lotNo, reviewerName: users.displayName })
     .from(reviews)
     .innerJoin(auctions, eq(auctions.id, reviews.auctionId))
     .innerJoin(users, eq(users.id, reviews.reviewerId))

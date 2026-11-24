@@ -34,10 +34,11 @@ export async function submitReview(user: UserRow, auctionId: string, input: Revi
 
 export async function reviewsReceived(userId: string): Promise<Review[]> {
   const rows = await reviewsReceivedRows(db, userId);
-  return rows.map(({ review, auctionTitle, lotNo, reviewerName }) => ({
+  return rows.map(({ review, auctionTitle, auctionTitleNe, lotNo, reviewerName }) => ({
     id: review.id,
     auctionId: review.auctionId,
     auctionTitle,
+    auctionTitleNe,
     lotNo,
     reviewer: { id: review.reviewerId, displayName: reviewerName, initials: initialsOf(reviewerName) },
     revieweeRole: review.revieweeRole,

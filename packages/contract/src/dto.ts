@@ -32,6 +32,8 @@ export interface AuctionCard {
   id: string;
   lotNo: number;
   title: string;
+  /** Optional Nepali title; clients fall back to `title`. */
+  titleNe: string | null;
   category: string;
   brand: string | null;
   condition: string;
@@ -156,6 +158,7 @@ export interface ImageCredit {
 
 export interface AuctionDetail extends AuctionCard, AuctionLiveState {
   description: string;
+  descriptionNe: string | null;
   specs: { label: string; value: string }[];
   images: string[];
   /** Keyed by image URL; only stock demo photos have one. */
@@ -198,6 +201,7 @@ export interface AuctionResult {
   auctionId: string;
   lotNo: number;
   title: string;
+  titleNe: string | null;
   status: AuctionStatus;
   outcome: 'sold' | 'reserve_not_met' | 'no_bids' | 'voided';
   winnerName: string | null;
@@ -294,6 +298,7 @@ export interface Review {
   id: string;
   auctionId: string;
   auctionTitle: string;
+  auctionTitleNe: string | null;
   lotNo: number;
   reviewer: { id: string; displayName: string; initials: string };
   /** The reviewed person's side of the sale. */

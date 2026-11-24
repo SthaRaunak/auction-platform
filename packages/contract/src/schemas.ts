@@ -28,9 +28,12 @@ export const resetPasswordInput = z.object({ token: z.string().min(16).max(200),
 // ── auctions ────────────────────────────────────────────────────────────────
 export const specSchema = z.object({ label: z.string().trim().min(1).max(40), value: z.string().trim().min(1).max(120) });
 
+// Nepali text is optional; the web app falls back to English wherever it's missing.
 export const auctionCreateInput = z.object({
   title: z.string().trim().min(5).max(120),
+  titleNe: z.string().trim().max(120).nullish(),
   description: z.string().trim().max(5000).default(''),
+  descriptionNe: z.string().trim().max(5000).nullish(),
   category: z.enum(CATEGORY_SLUGS),
   brand: z.string().trim().max(60).nullish(),
   condition: z.enum(CONDITION_VALUES),
@@ -55,11 +58,11 @@ export type AuctionUpdateInput = z.infer<typeof auctionUpdateInput>;
 
 /**
  * Fields that freeze once the first bid lands (A6). Everything else —
- * description and *additional* photos — stays editable, and every edit is
- * appended to the public amendment log.
+ * description (in either language) and *additional* photos — stays editable,
+ * and every edit is appended to the public amendment log.
  */
 export const MATERIAL_FIELDS = [
-  'title', 'category', 'brand', 'condition', 'specs', 'delivery', 'shippingCost', 'location',
+  'title', 'titleNe', 'category', 'brand', 'condition', 'specs', 'delivery', 'shippingCost', 'location',
   'startPrice', 'reservePrice', 'incrementBands', 'emdAmount', 'startsAt', 'endsAt',
   'softCloseWindowSec', 'softCloseExtendSec',
 ] as const satisfies readonly (keyof AuctionCreateInput)[];

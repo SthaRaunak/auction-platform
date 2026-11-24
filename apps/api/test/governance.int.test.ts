@@ -1,9 +1,10 @@
+import { listAuctionsQuery } from '@bidwell/contract';
 import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from '@/db';
 import { deps } from '@/deps';
 import { amendments } from '@/modules/auction/auction.schema';
-import { updateAuction } from '@/modules/auction/auction.usecase';
+import { listAuctions, updateAuction } from '@/modules/auction/auction.usecase';
 import { bids } from '@/modules/bid/bid.schema';
 import { getAuctionDetail, getAuctionResult, placeBid } from '@/modules/bid/bid.usecase';
 import * as mod from '@/modules/moderation/moderation.usecase';
@@ -38,6 +39,26 @@ describe('edits after the first bid (A6)', () => {
     const detail = await getAuctionDetail(a.id, null);
     expect(detail.amendments).toHaveLength(1);
     expect(detail.amendments[0].afterBids).toBe(true);
+  });
+
+  it('the Nepali title freezes with the English one; the Nepali description stays editable', async () => {
+    const seller = await makeUser();
+    const alice = await makeUser();
+    const a = await makeAuction(seller, { titleNe: 'टोयोटा हाइलक्स (२०१०)', descriptionNe: '  ' });
+    expect(a.descriptionNe).toBeNull(); // blank Nepali text is stored as "none", so clients fall back to English
+    await placeBid(alice, a.id, { maxAmount: 20_000, idempotencyKey: key() }, meta);
+
+    await expect(updateAuction(seller, a.id, { titleNe: 'अर्कै सवारी' })).rejects.toMatchObject({ code: 'MATERIAL_FIELDS_FROZEN', details: { fields: ['titleNe'] } });
+    await updateAuction(seller, a.id, { descriptionNe: 'सर्भे बोर्डले काम नलाग्ने ठहर गरेको।' });
+    const detail = await getAuctionDetail(a.id, null);
+    expect(detail).toMatchObject({ titleNe: 'टोयोटा हाइलक्स (२०१०)', descriptionNe: 'सर्भे बोर्डले काम नलाग्ने ठहर गरेको।' });
+    expect(detail.amendments[0].changes.map((c) => c.field)).toEqual(['descriptionNe']);
+  });
+
+  it('listing search matches the Nepali title too', async () => {
+    const seller = await makeUser();
+    const a = await makeAuction(seller, { titleNe: 'जफत गरिएका मोबाइल फोन' });
+    expect((await listAuctions(listAuctionsQuery.parse({ q: 'मोबाइल' }), null)).items.map((c) => c.id)).toEqual([a.id]);
   });
 
   it('only the seller can edit', async () => {

@@ -57,6 +57,13 @@
       "when": 1795160945811,
       "tag": "0007_image_credits",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795534491347,
+      "tag": "0008_nepali_text",
+      "breakpoints": true
     }
   ]
 }
