@@ -1,0 +1,1 @@
+ALTER TABLE "auctions" ADD COLUMN "image_credits" jsonb DEFAULT '{}'::jsonb NOT NULL;
