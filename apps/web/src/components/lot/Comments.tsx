@@ -41,7 +41,7 @@ export function Comments({ auctionId, initial, me, status }: { auctionId: string
         <h2 id="comments-title" className="k row !gap-1.5">
           <MessageSquare size={13} aria-hidden /> {t('comments.title')}
         </h2>
-        <span className="mut text-[11px]">{t('comments.count', { count: visible })}</span>
+        <span className="mut text-[12px]">{t('comments.count', { count: visible })}</span>
       </div>
 
       {items.length === 0 ? (
@@ -80,7 +80,7 @@ export function Comments({ auctionId, initial, me, status }: { auctionId: string
               </p>
             )}
             <div className="flex items-center justify-between gap-3">
-              <span className="mut text-[11.5px]">{t('comments.postingAs', { name: me.displayName })}</span>
+              <span className="mut text-[12px]">{t('comments.postingAs', { name: me.displayName })}</span>
               <button className="btn btn-primary" disabled={busy || !body.trim()}>
                 {t(busy ? 'comments.posting' : 'comments.post')}
               </button>
@@ -124,7 +124,7 @@ function CommentRow({ c, now, onRemoved }: { c: Comment; now: number; onRemoved:
               <ShieldCheck size={11} aria-hidden /> {t('comments.moderator')}
             </span>
           )}
-          <span className="mut text-[11.5px]" suppressHydrationWarning>
+          <span className="mut text-[12px]" suppressHydrationWarning>
             {ago(c.at, now)}
           </span>
         </div>

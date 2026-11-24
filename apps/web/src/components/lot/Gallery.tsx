@@ -17,7 +17,7 @@ export function Gallery({ images, credits, title, lotNo }: { images: string[]; c
         <Photo src={images[active]} alt={t('gallery.photoAlt', { title, n: active + 1 })} label={count ? t('gallery.mainView', { n: active + 1 }) : t('gallery.noPhotosLabel', { lotNo: digits(lotNo) })} />
       </div>
       <div className="mt-[11px] flex items-center justify-between">
-        <span className="mut text-[11.5px]">
+        <span className="mut text-[12px]">
           {count ? t('gallery.photoOf', { n: active + 1, count }) : t('gallery.noPhotos')}
           {credit && (
             <>
@@ -42,7 +42,7 @@ export function Gallery({ images, credits, title, lotNo }: { images: string[]; c
           )}
         </span>
         {count > 0 && (
-          <a href={images[active]} target="_blank" rel="noreferrer" className="text-[11.5px]">
+          <a href={images[active]} target="_blank" rel="noreferrer" className="text-[12px]">
             {t('gallery.fullScreen')}
           </a>
         )}

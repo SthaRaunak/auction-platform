@@ -49,7 +49,7 @@ export function LotCard({ lot, signedIn }: { lot: AuctionCard; signedIn: boolean
         </Link>
         <WatchStar auctionId={lot.id} watched={lot.watched} signedIn={signedIn} title={title} />
         <CountdownChip endsAt={lot.endsAt} status={lot.status} />
-        <span className="absolute bottom-2.5 left-2.5 rounded-full border border-neutral-300 bg-white px-2.5 py-1 text-[11px]">{i18n.category(lot.category)}</span>
+        <span className="absolute bottom-2.5 left-2.5 rounded-full border border-neutral-300 bg-white px-2.5 py-1 text-[12px]">{i18n.category(lot.category)}</span>
       </div>
       <div className="flex flex-1 flex-col gap-[9px] px-[15px] pb-[15px] pt-3.5">
         <h3 className="ttl text-[18px]">
@@ -67,9 +67,9 @@ export function LotCard({ lot, signedIn }: { lot: AuctionCard; signedIn: boolean
         </div>
         <div className="mt-auto flex items-end justify-between gap-3 border-t border-divider pt-[11px]">
           <div aria-live="polite">
-            <div className="mut mb-[5px] text-[11px]">{bidLabel(i18n, lot)}</div>
+            <div className="mut mb-[5px] text-[12px]">{bidLabel(i18n, lot)}</div>
             <div className="num text-[26px]">{money(lot.price)}</div>
-            <div className="mut mt-[5px] text-[11.5px]">
+            <div className="mut mt-[5px] text-[12px]">
               {t('common.bids', { count: lot.bidCount })} · {shipLabel(i18n, lot)}
             </div>
           </div>

@@ -159,18 +159,18 @@ export function LotView({ detail, similar, comments, me }: { detail: AuctionDeta
             </h2>
             <dl className="grid grid-cols-2 gap-x-5 gap-y-2.5 text-[13px]">
               <div>
-                <dt className="mut text-[11.5px]">{t('lot.condition')}</dt>
+                <dt className="mut text-[12px]">{t('lot.condition')}</dt>
                 <dd>{i18n.condition(detail.condition)}</dd>
               </div>
               {detail.brand && (
                 <div>
-                  <dt className="mut text-[11.5px]">{t('lot.brand')}</dt>
+                  <dt className="mut text-[12px]">{t('lot.brand')}</dt>
                   <dd>{detail.brand}</dd>
                 </div>
               )}
               {detail.specs.map((s) => (
                 <div key={s.label}>
-                  <dt className="mut text-[11.5px]">{s.label}</dt>
+                  <dt className="mut text-[12px]">{s.label}</dt>
                   <dd>{s.value}</dd>
                 </div>
               ))}
@@ -180,7 +180,7 @@ export function LotView({ detail, similar, comments, me }: { detail: AuctionDeta
                 {description}
               </p>
             )}
-            {englishDescriptionOnly && <p className="mut m-0 text-[11.5px]">{t('lot.englishOnly')}</p>}
+            {englishDescriptionOnly && <p className="mut m-0 text-[12px]">{t('lot.englishOnly')}</p>}
           </section>
 
           <section className="card !gap-[11px] !p-4" aria-labelledby="delivery-title">
@@ -225,7 +225,7 @@ export function LotView({ detail, similar, comments, me }: { detail: AuctionDeta
                 <div className="flex flex-col gap-1.5 px-[13px] pb-[13px] pt-3">
                   <div className="ttl text-[14.5px]">{i18n.pick(lot.title, lot.titleNe)}</div>
                   <div className="num text-[18px]">{money(lot.price)}</div>
-                  <div className="mut text-[11.5px]">
+                  <div className="mut text-[12px]">
                     {i18n.rich('lot.left', { time: () => <CountdownText endsAt={lot.endsAt} status={lot.status} /> }, { bids: t('common.bids', { count: lot.bidCount }) })}
                   </div>
                 </div>

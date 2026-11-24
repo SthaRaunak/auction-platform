@@ -90,13 +90,13 @@ async function RatingStat({ label, r }: { label: string; r: RatingSummary }) {
   const { t, num } = await getI18n();
   return (
     <div className="flex flex-col items-end gap-1">
-      <dt className="mut text-[11px]">{label}</dt>
+      <dt className="mut text-[12px]">{label}</dt>
       <dd className="flex items-center gap-2">
         {r.average !== null ? (
           <>
             <Stars value={r.average} />
             <span className="num text-[22px]">{num(r.average, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
-            <span className="mut text-[11.5px]">({num(r.count)})</span>
+            <span className="mut text-[12px]">({num(r.count)})</span>
           </>
         ) : (
           <span className="mut text-[13px]">{t('common.noReviewsYet')}</span>
@@ -109,7 +109,7 @@ async function RatingStat({ label, r }: { label: string; r: RatingSummary }) {
 function Count({ label, n }: { label: string; n: string }) {
   return (
     <div className="flex flex-col items-end gap-0.5">
-      <dt className="mut text-[11px]">{label}</dt>
+      <dt className="mut text-[12px]">{label}</dt>
       <dd className="num text-[22px]">{n}</dd>
     </div>
   );

@@ -96,7 +96,7 @@ export function ListingView({ params, initial, brands, stats: initialStats, sign
       <div className="mx-auto max-w-[1240px] px-6 pt-[22px]">
         <div className="flex flex-wrap items-end justify-between gap-5">
           <div>
-            <nav aria-label="Breadcrumb" className="row !gap-[7px] text-[11.5px]" style={{ color: 'color-mix(in srgb, var(--color-text) 55%, transparent)' }}>
+            <nav aria-label="Breadcrumb" className="row !gap-[7px] text-[12px]" style={{ color: 'color-mix(in srgb, var(--color-text) 55%, transparent)' }}>
               <Link href="/" className="text-inherit" style={{ color: 'inherit' }}>
                 {t('common.home')}
               </Link>
@@ -141,24 +141,24 @@ export function ListingView({ params, initial, brands, stats: initialStats, sign
           <div className={`${filtersOpen ? 'block' : 'hidden'} mt-4 lg:mt-0 lg:block`}>
             <div className="mb-3.5 flex items-baseline justify-between">
               <span className="k">{t('listing.filtersHeading', { count: chips.length })}</span>
-              <Link href={params.category ? `/?category=${params.category}` : '/'} className="text-[11.5px]">
+              <Link href={params.category ? `/?category=${params.category}` : '/'} className="text-[12px]">
                 {t('listing.clear')}
               </Link>
             </div>
 
             <fieldset>
-              <legend className="mb-[7px] text-[11px] font-medium uppercase tracking-[.09em] text-accent-700">{t('listing.brand')}</legend>
+              <legend className="mb-[7px] text-[12px] font-medium uppercase tracking-[.09em] text-accent-700">{t('listing.brand')}</legend>
               {brands.length === 0 && <p className="mut text-[12.5px]">{t('listing.noBrands')}</p>}
               {shownBrands.map((b) => (
                 <label key={b.brand} className="chk">
                   <input type="checkbox" checked={csv(params.brand).includes(b.brand)} onChange={() => toggleIn('brand', b.brand)} />
                   <i />
                   <span className="flex-1">{b.brand}</span>
-                  <span className="mut text-[11.5px]">{num(b.count)}</span>
+                  <span className="mut text-[12px]">{num(b.count)}</span>
                 </label>
               ))}
               {brands.length > 4 && (
-                <button type="button" className="mt-1.5 inline-block cursor-pointer border-0 bg-transparent p-0 text-[11.5px] text-accent-700 underline underline-offset-[3px]" onClick={() => setAllBrands((v) => !v)}>
+                <button type="button" className="mt-1.5 inline-block cursor-pointer border-0 bg-transparent p-0 text-[12px] text-accent-700 underline underline-offset-[3px]" onClick={() => setAllBrands((v) => !v)}>
                   {allBrands ? t('listing.showFewer') : t('listing.showMore', { count: brands.length - 4 })}
                 </button>
               )}
@@ -171,7 +171,7 @@ export function ListingView({ params, initial, brands, stats: initialStats, sign
             <CheckGroup legend={t('listing.ending')} options={ENDING_WINDOWS.map((e) => ({ value: e.value, label: i18n.ending(e.value) }))} selected={params.ending ? [params.ending] : []} onToggle={(v) => go({ ending: params.ending === v ? undefined : v })} />
             <hr className="hr" />
             <fieldset>
-              <legend className="mb-[9px] text-[11px] font-medium uppercase tracking-[.09em] text-accent-700">{t('listing.priceRange')}</legend>
+              <legend className="mb-[9px] text-[12px] font-medium uppercase tracking-[.09em] text-accent-700">{t('listing.priceRange')}</legend>
               <div className="row !gap-2">
                 <input className="input" inputMode="numeric" placeholder={t('listing.min')} aria-label={t('listing.minAria')} value={minPrice} onChange={(e) => setMinPrice(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && applyPrice()} />
                 <span className="mut" aria-hidden>
@@ -182,7 +182,7 @@ export function ListingView({ params, initial, brands, stats: initialStats, sign
             </fieldset>
             <hr className="hr" />
             <fieldset>
-              <legend className="mb-[9px] text-[11px] font-medium uppercase tracking-[.09em] text-accent-700">{t('listing.sellerRating')}</legend>
+              <legend className="mb-[9px] text-[12px] font-medium uppercase tracking-[.09em] text-accent-700">{t('listing.sellerRating')}</legend>
               <span className="seg w-full">
                 {[
                   { v: '', l: t('listing.any') },
@@ -270,7 +270,7 @@ export function ListingView({ params, initial, brands, stats: initialStats, sign
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
     <div className="flex flex-col items-end gap-0.5">
-      <dt className="mut text-[11px]">{label}</dt>
+      <dt className="mut text-[12px]">{label}</dt>
       <dd className="num text-[22px]" style={accent ? { color: 'var(--color-accent-800)' } : undefined}>
         {value}
       </dd>
@@ -281,7 +281,7 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 function CheckGroup({ legend, options, selected, onToggle }: { legend: string; options: readonly { value: string; label: string }[]; selected: string[]; onToggle: (v: string) => void }) {
   return (
     <fieldset>
-      <legend className="mb-[7px] text-[11px] font-medium uppercase tracking-[.09em] text-accent-700">{legend}</legend>
+      <legend className="mb-[7px] text-[12px] font-medium uppercase tracking-[.09em] text-accent-700">{legend}</legend>
       {options.map((o) => (
         <label key={o.value} className="chk">
           <input type="checkbox" checked={selected.includes(o.value)} onChange={() => onToggle(o.value)} />

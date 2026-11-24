@@ -16,7 +16,7 @@ export function BidFeed({ feed, freshKeys, viewerNo, connection, live, bidCount,
           {live ? t('feed.live') : ''}
         </h2>
         {live && (
-          <span className="row mut !gap-1.5 text-[11px]">
+          <span className="row mut !gap-1.5 text-[12px]">
             <span className="block h-[7px] w-[7px] rounded-full" style={{ background: connection === 'live' ? 'var(--color-accent)' : 'var(--color-neutral-400)' }} aria-hidden />
             {t(connection === 'live' ? 'feed.updating' : connection === 'connecting' ? 'feed.connecting' : 'feed.reconnecting')}
           </span>
@@ -35,14 +35,14 @@ export function BidFeed({ feed, freshKeys, viewerNo, connection, live, bidCount,
                 className={`flex items-center justify-between gap-2.5 px-4 py-2.5 ${freshKeys.includes(f.key) ? 'flash' : ''}`}
                 style={{ borderBottom: '1px solid color-mix(in srgb, var(--color-text) 7%, transparent)', background: i === 0 && !freshKeys.includes(f.key) ? 'var(--color-accent-100)' : undefined }}
               >
-                <span className="av h-[26px] w-[26px] text-[10px]" aria-hidden>
+                <span className="av h-[26px] w-[26px] text-[12px]" aria-hidden>
                   {mine ? t('feed.you') : f.name ? f.name.slice(0, 2).toUpperCase() : `#${digits(f.bidderNo)}`}
                 </span>
                 <div className="flex-1">
                   <div className="text-[13px]" style={{ fontWeight: i === 0 ? 600 : 400 }}>
                     {who}
                   </div>
-                  <div className="mut text-[11px]" suppressHydrationWarning>
+                  <div className="mut text-[12px]" suppressHydrationWarning>
                     {t(f.kind === 'auto' ? 'feed.autoBid' : 'feed.bid')} · {ago(f.at, now)}
                   </div>
                 </div>

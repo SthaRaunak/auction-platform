@@ -83,7 +83,7 @@ export function BidPanel({ detail, state, yourMax, isLeader, onResult }: Props) 
     <div className="card !gap-0 !p-[18px]">
       <div className="flex items-start justify-between gap-5">
         <div aria-live="polite" aria-atomic>
-          <div className="mut mb-[7px] text-[11.5px]">
+          <div className="mut mb-[7px] text-[12px]">
             {t(state.status !== 'live' ? (state.finalPrice ? 'bid.winningBid' : 'bid.finalPrice') : isLeader ? 'card.yourBidOnTop' : state.bidCount ? 'card.currentBid' : 'card.startingBid')} · {t('common.bids', { count: state.bidCount })}
           </div>
           <div className="num text-[38px] sm:text-[44px]">{money(state.finalPrice ?? state.price)}</div>
@@ -94,14 +94,14 @@ export function BidPanel({ detail, state, yourMax, isLeader, onResult }: Props) 
           )}
         </div>
         <div className="text-right">
-          <div className="mut mb-[7px] text-[11.5px]">{t(state.status === 'live' ? 'bid.endsIn' : 'bid.ended')}</div>
+          <div className="mut mb-[7px] text-[12px]">{t(state.status === 'live' ? 'bid.endsIn' : 'bid.ended')}</div>
           <div className="num text-[24px] sm:text-[30px]" style={{ color: urgent ? 'var(--color-accent-800)' : undefined }} suppressHydrationWarning>
             {state.status === 'live' ? endsLabel : endStamp(detail.closedAt ?? state.endsAt)}
           </div>
           <div className="mut mt-2 text-[12px]" suppressHydrationWarning>
             {endStamp(state.endsAt)}
           </div>
-          {extended && state.status === 'live' && <div className="mt-1 text-[11px] text-accent-700">{t('bid.extended')}</div>}
+          {extended && state.status === 'live' && <div className="mt-1 text-[12px] text-accent-700">{t('bid.extended')}</div>}
         </div>
       </div>
 
@@ -115,7 +115,7 @@ export function BidPanel({ detail, state, yourMax, isLeader, onResult }: Props) 
             <label htmlFor="max-bid" className="text-[12.5px] font-medium">
               {t(isLeader ? 'bid.raiseMax' : 'bid.yourMax')}
             </label>
-            <span className="mut text-[11.5px]">{t('bid.stepsOf', { step: money(step), min: money(minimum) })}</span>
+            <span className="mut text-[12px]">{t('bid.stepsOf', { step: money(step), min: money(minimum) })}</span>
           </div>
           <div className="stepper">
             <button type="button" onClick={() => stepBy(-1)} disabled={amount <= minimum} aria-label={t('bid.lower')} className="border-r border-divider">
@@ -139,7 +139,7 @@ export function BidPanel({ detail, state, yourMax, isLeader, onResult }: Props) 
                 aria-describedby="max-bid-sub"
                 className="w-full border-0 bg-transparent p-0 pt-2 text-center text-[23px] tabular-nums tracking-[-0.02em] text-ink outline-none"
               />
-              <div id="max-bid-sub" className="mut -mt-0.5 pb-1.5 text-[10.5px]">
+              <div id="max-bid-sub" className="mut -mt-0.5 pb-1.5 text-[12px]">
                 {steps <= 1 ? t(isLeader ? 'bid.oneAboveYours' : 'bid.minimumNext') : t('bid.stepsAbove', { count: steps })}
               </div>
             </div>
@@ -175,7 +175,7 @@ export function BidPanel({ detail, state, yourMax, isLeader, onResult }: Props) 
 
       <ActionsRow detail={detail} />
       {detail.softCloseWindowSec > 0 && state.status === 'live' && (
-        <p className="mut mt-3 flex gap-1.5 text-[11.5px] leading-[1.5]">
+        <p className="mut mt-3 flex gap-1.5 text-[12px] leading-[1.5]">
           <Info size={13} className="mt-0.5 flex-none" aria-hidden />
           {t('bid.softClose', { window: Math.round(detail.softCloseWindowSec / 60), extend: Math.round(detail.softCloseExtendSec / 60) })}
         </p>
@@ -316,7 +316,7 @@ function BidBlocker({ detail, secondsLeft }: { detail: AuctionDetail; secondsLef
           >
             {busy ? t('bid.processing') : t('bid.payDeposit', { amount: money(detail.emdAmount!) })}
           </button>
-          <span className="mut text-[11.5px]">{t('bid.demoGateway')}</span>
+          <span className="mut text-[12px]">{t('bid.demoGateway')}</span>
           {error && <span className="err">{error}</span>}
         </div>
       );

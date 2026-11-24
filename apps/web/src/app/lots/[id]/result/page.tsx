@@ -49,34 +49,34 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
 
       <dl className="card mt-5 grid !gap-5 !p-5 sm:grid-cols-4">
         <div>
-          <dt className="mut text-[11.5px]">{t('result.outcome')}</dt>
+          <dt className="mut text-[12px]">{t('result.outcome')}</dt>
           <dd className="mt-1 text-[15px] font-medium">{t(`result.outcomes.${r.outcome}`)}</dd>
         </div>
         <div>
-          <dt className="mut text-[11.5px]">{t('result.winner')}</dt>
+          <dt className="mut text-[12px]">{t('result.winner')}</dt>
           <dd className="mt-1 text-[15px]">{r.winnerName ?? '—'}</dd>
         </div>
         <div>
-          <dt className="mut text-[11.5px]">{t('result.finalPrice')}</dt>
+          <dt className="mut text-[12px]">{t('result.finalPrice')}</dt>
           <dd className="num mt-1 text-[24px]">{r.finalPrice !== null ? money(r.finalPrice) : '—'}</dd>
         </div>
         <div>
-          <dt className="mut text-[11.5px]">{t('result.bidsBidders')}</dt>
+          <dt className="mut text-[12px]">{t('result.bidsBidders')}</dt>
           <dd className="num mt-1 text-[24px]">
             {num(r.bidCount)} · {num(r.bidderCount)}
           </dd>
         </div>
         <div className="sm:col-span-4 grid gap-5 border-t border-divider pt-4 sm:grid-cols-3">
           <div>
-            <dt className="mut text-[11.5px]">{t('result.opened')}</dt>
+            <dt className="mut text-[12px]">{t('result.opened')}</dt>
             <dd className="text-[13px]">{fullStamp(r.startsAt)}</dd>
           </div>
           <div>
-            <dt className="mut text-[11.5px]">{t('result.scheduledEnd')}</dt>
+            <dt className="mut text-[12px]">{t('result.scheduledEnd')}</dt>
             <dd className="text-[13px]">{fullStamp(r.originalEndsAt)}</dd>
           </div>
           <div>
-            <dt className="mut text-[11.5px]">{t('result.actualEnd')}</dt>
+            <dt className="mut text-[12px]">{t('result.actualEnd')}</dt>
             <dd className="text-[13px]">{r.endedAt ? fullStamp(r.endedAt) : '—'}</dd>
           </div>
         </div>
@@ -96,7 +96,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
           {r.chain.headHash && (
             <>
               {' '}
-              {t('result.headHash')} <code className="break-all text-[11.5px]">{r.chain.headHash}</code>
+              {t('result.headHash')} <code className="break-all text-[12px]">{r.chain.headHash}</code>
             </>
           )}
         </span>
@@ -150,7 +150,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                   <td>{b.leaderAfterNo ? `#${digits(b.leaderAfterNo)}` : '—'}</td>
                   <td className="mut whitespace-nowrap">{fullStamp(b.at)}</td>
                   <td>
-                    <code className="text-[11px]" title={`prev ${b.prevHash}\nthis ${b.hash}`}>
+                    <code className="text-[12px]" title={`prev ${b.prevHash}\nthis ${b.hash}`}>
                       {b.hash.slice(0, 12)}…
                     </code>
                   </td>

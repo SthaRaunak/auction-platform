@@ -5,6 +5,7 @@
  * The base system is "Industry", customised: rounded geometry, Plus Jakarta
  * Sans throughout, no registration marks, no duotone, no condensed face.
  */
+/* Minimum type size is 12px everywhere (readability); the mock's 9.5–11.5px sizes were raised. */
 :root {
   --color-bg: #f2f2f3;
   --color-surface: #e9e9ea;
@@ -76,7 +77,7 @@
     letter-spacing: -0.019em;
   }
   h6 {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     letter-spacing: 0.09em;
     text-transform: uppercase;
@@ -104,14 +105,14 @@
 @layer components {
   /* — type helpers — */
   .ttl { font-weight: 600; letter-spacing: -0.019em; line-height: 1.14; }
-  .k { font: 500 10.5px/1 var(--font-body); letter-spacing: 0.09em; text-transform: uppercase; color: var(--color-accent-700); }
+  .k { font: 500 12px/1 var(--font-body); letter-spacing: 0.09em; text-transform: uppercase; color: var(--color-accent-700); }
   .mut { color: var(--muted); }
   .num { font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -0.03em; line-height: 1; }
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
   .row { display: flex; align-items: center; gap: 10px; }
 
   /* — avatar — */
-  .av { border-radius: 999px; background: var(--color-accent-200); color: var(--color-accent-800); display: grid; place-items: center; font: 500 11px/1 var(--font-body); flex: none; }
+  .av { border-radius: 999px; background: var(--color-accent-200); color: var(--color-accent-800); display: grid; place-items: center; font: 500 12px/1 var(--font-body); flex: none; }
 
   /* — placeholder photography (diagonal cross) — */
   .ph {
@@ -122,7 +123,7 @@
     display: grid;
     place-items: center;
   }
-  .ph > span { font: 500 9.5px/1 var(--font-body); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-neutral-600); background: var(--color-bg); padding: 3px 7px; border-radius: 999px; }
+  .ph > span { font: 500 12px/1 var(--font-body); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-neutral-600); background: var(--color-bg); padding: 3px 7px; border-radius: 999px; }
 
   /* — buttons — */
   .btn {
@@ -161,7 +162,7 @@
   .input:disabled { background: var(--color-neutral-100); color: var(--muted); cursor: not-allowed; }
   textarea.input { min-height: 110px; resize: vertical; padding-block: 10px; }
   select.input { appearance: none; padding-right: 32px; cursor: pointer; }
-  .hint { font-size: 11.5px; color: var(--muted); margin-top: 5px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 5px; }
   .err { font-size: 12px; color: #8a3b3b; margin-top: 5px; }
 
   .seg { display: inline-flex; overflow: hidden; border: 1px solid var(--color-neutral-300); border-radius: 999px; background: #fff; }
@@ -186,7 +187,7 @@
   .pill:hover { border-color: var(--color-accent); color: var(--color-accent-800); }
   .pill.on { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
   .pill.on:hover { background: var(--color-accent-600); color: #fff; }
-  .tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; letter-spacing: 0.02em; padding: 4px 11px; border-radius: 999px; }
+  .tag { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; letter-spacing: 0.02em; padding: 4px 11px; border-radius: 999px; }
   .tag-accent { background: var(--color-accent-100); color: var(--color-accent-800); }
   .tag-neutral { background: var(--color-neutral-100); color: var(--color-neutral-800); }
   .tag-warn { background: #fbefe2; color: #7a4a1c; }
@@ -211,7 +212,7 @@
 
   /* — tables — */
   .table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-  .table th { text-align: left; font: 500 10.5px/1.3 var(--font-body); letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); padding: 7px 8px; border-bottom: 1px solid var(--color-divider); }
+  .table th { text-align: left; font: 500 12px/1.3 var(--font-body); letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); padding: 7px 8px; border-bottom: 1px solid var(--color-divider); }
   .table td { padding: 9px 8px; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent); vertical-align: top; }
   .table tbody tr:hover { background: color-mix(in srgb, var(--color-text) 4%, transparent); }
 

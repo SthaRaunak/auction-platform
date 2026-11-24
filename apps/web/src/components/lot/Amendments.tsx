@@ -31,7 +31,7 @@ export function Amendments({ items }: { items: Amendment[] }) {
       <ol className="mt-2.5 flex flex-col gap-3">
         {items.map((a) => (
           <li key={a.id}>
-            <div className="mut text-[11.5px]">
+            <div className="mut text-[12px]">
               {fullStamp(a.at)} · {t(a.afterBids ? 'amend.afterBids' : 'amend.beforeBids')}
             </div>
             <ul className="mt-1">

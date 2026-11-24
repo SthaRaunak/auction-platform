@@ -32,7 +32,7 @@ export function Marquee({ items }: { items: AuctionCard[] }) {
   if (!items.length) return null;
   return (
     <section aria-label={t('listing.endingSoon')} className="flex items-stretch overflow-hidden bg-accent-900 text-bg">
-      <span className="flex flex-none items-center gap-2 border-r px-[18px] text-[10px] font-semibold uppercase tracking-[.13em]" style={{ borderColor: 'color-mix(in srgb, var(--color-bg) 22%, transparent)' }}>
+      <span className="flex flex-none items-center gap-2 border-r px-[18px] text-[12px] font-semibold uppercase tracking-[.13em]" style={{ borderColor: 'color-mix(in srgb, var(--color-bg) 22%, transparent)' }}>
         <Clock size={13} strokeWidth={1.5} aria-hidden />
         {t('listing.endingSoon')}
       </span>
