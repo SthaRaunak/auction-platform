@@ -32,7 +32,7 @@
   --color-accent-800: #2c455d;
   --color-accent-900: #1d2d3d;
 
-  --font-body: var(--font-jakarta), system-ui, sans-serif;
+  --font-body: var(--font-jakarta), var(--font-devanagari), system-ui, sans-serif;
 
   --shadow-sm: 0 1px 2px color-mix(in srgb, #2b2b2d 14%, transparent);
   --shadow-md: 0 3px 10px color-mix(in srgb, #2b2b2d 16%, transparent);
@@ -270,4 +270,10 @@
   .mq-scroll { overflow-x: auto; }
   .flash { animation: none; }
   .cat-rail { scroll-behavior: auto; }
+}
+
+/* Nepali: Devanagari needs room above and below for matras, and letter-spacing breaks conjuncts. */
+@layer components {
+  :lang(ne) .ttl { letter-spacing: 0; line-height: 1.4; }
+  :lang(ne) .k { letter-spacing: 0.02em; line-height: 1.5; }
 }

@@ -3,17 +3,21 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { AppealCard, ReportCard } from '@/components/account/ModerationConsole';
-import { fullStamp } from '@/lib/format';
+import { getI18n } from '@/i18n/server';
 import { apiGet, getMe } from '@/lib/server';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Moderation' };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n();
+  return { title: t('meta.moderation') };
+}
 
 const TABS = [
-  { id: 'reports', label: 'Open reports' },
-  { id: 'handled', label: 'Handled reports' },
-  { id: 'appeals', label: 'Appeals' },
-  { id: 'audit', label: 'Audit log' },
+  { id: 'reports', label: 'moderation.tabReports' },
+  { id: 'handled', label: 'moderation.tabHandled' },
+  { id: 'appeals', label: 'moderation.tabAppeals' },
+  { id: 'audit', label: 'moderation.tabAudit' },
 ] as const;
 
 export default async function ModerationPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
@@ -21,16 +25,17 @@ export default async function ModerationPage({ searchParams }: { searchParams: P
   if (!me) redirect('/login?next=/moderation');
   if (me.role !== 'moderator' && me.role !== 'admin') notFound();
   const requested = (await searchParams).tab;
-  const tab = TABS.find((t) => t.id === requested)?.id ?? 'reports';
+  const tab = TABS.find((x) => x.id === requested)?.id ?? 'reports';
+  const { t } = await getI18n();
 
   return (
     <div className="mx-auto max-w-[1040px] px-6 py-8">
-      <h1 className="ttl text-[34px]">Moderation</h1>
-      <p className="mut mt-2 text-[14px]">Every action requires a reason, is published on the lot, and is written to the append-only audit log.</p>
+      <h1 className="ttl text-[34px]">{t('moderation.title')}</h1>
+      <p className="mut mt-2 text-[14px]">{t('moderation.lead')}</p>
       <div className="mt-5 flex flex-wrap gap-1.5 border-b border-divider" role="tablist">
-        {TABS.map((t) => (
-          <Link key={t.id} href={`/moderation?tab=${t.id}`} role="tab" aria-selected={tab === t.id} className="tab">
-            {t.label}
+        {TABS.map((x) => (
+          <Link key={x.id} href={`/moderation?tab=${x.id}`} role="tab" aria-selected={tab === x.id} className="tab">
+            {t(x.label)}
           </Link>
         ))}
       </div>
@@ -44,8 +49,8 @@ export default async function ModerationPage({ searchParams }: { searchParams: P
 }
 
 async function Reports({ status }: { status: 'open' | 'actioned' }) {
-  const { items } = await apiGet<{ items: ReportRow[] }>(`/moderation/reports?status=${status}`);
-  if (!items.length) return <p className="mut">{status === 'open' ? 'No open reports. 🎉' : 'Nothing handled yet.'}</p>;
+  const [{ items }, { t }] = await Promise.all([apiGet<{ items: ReportRow[] }>(`/moderation/reports?status=${status}`), getI18n()]);
+  if (!items.length) return <p className="mut">{t(status === 'open' ? 'moderation.noOpen' : 'moderation.noHandled')}</p>;
   return (
     <ul className="flex flex-col gap-3">
       {items.map((r) => (
@@ -60,7 +65,8 @@ async function Appeals() {
     (['open', 'upheld', 'overturned'] as const).map((s) => apiGet<{ items: AppealRow[] }>(`/moderation/appeals?status=${s}`)),
   );
   const all = [...open.items, ...upheld.items, ...overturned.items];
-  if (!all.length) return <p className="mut">No appeals.</p>;
+  const { t } = await getI18n();
+  if (!all.length) return <p className="mut">{t('moderation.noAppeals')}</p>;
   return (
     <ul className="flex flex-col gap-3">
       {all.map((a) => (
@@ -71,17 +77,17 @@ async function Appeals() {
 }
 
 async function Audit() {
-  const { items } = await apiGet<{ items: AuditRow[] }>('/moderation/audit');
+  const [{ items }, { t, fullStamp }] = await Promise.all([apiGet<{ items: AuditRow[] }>('/moderation/audit'), getI18n()]);
   return (
     <div className="overflow-x-auto">
       <table className="table min-w-[760px]">
         <thead>
           <tr>
-            <th scope="col">When</th>
-            <th scope="col">Actor</th>
-            <th scope="col">Action</th>
-            <th scope="col">Target</th>
-            <th scope="col">Reason</th>
+            <th scope="col">{t('moderation.colWhen')}</th>
+            <th scope="col">{t('moderation.colActor')}</th>
+            <th scope="col">{t('moderation.colAction')}</th>
+            <th scope="col">{t('moderation.colTarget')}</th>
+            <th scope="col">{t('moderation.colReason')}</th>
           </tr>
         </thead>
         <tbody>
@@ -92,7 +98,7 @@ async function Audit() {
               <td>
                 <code className="text-[12px]">{a.action}</code>
               </td>
-              <td>{a.targetType === 'auction' ? <Link href={`/lots/${a.targetId}`}>auction</Link> : <span className="mut">{a.targetType}</span>}</td>
+              <td>{a.targetType === 'auction' ? <Link href={`/lots/${a.targetId}`}>{t('moderation.auction')}</Link> : <span className="mut">{a.targetType}</span>}</td>
               <td>{a.reason}</td>
             </tr>
           ))}

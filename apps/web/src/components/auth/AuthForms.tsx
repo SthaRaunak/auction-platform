@@ -3,11 +3,13 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { useI18n } from '@/i18n/client';
 import { ApiError, api } from '@/lib/client';
 
 const safeNext = (next?: string) => (next && next.startsWith('/') && !next.startsWith('//') ? next : '/');
 
 function useSubmit() {
+  const { t, error: errorText } = useI18n();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const run = async (fn: () => Promise<void>) => {
@@ -16,21 +18,17 @@ function useSubmit() {
     try {
       await fn();
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : 'Something went wrong. Try again.');
+      setError(e instanceof ApiError ? errorText(e) : t('common.somethingWrong'));
       setBusy(false);
     }
   };
   return { busy, error, run };
 }
 
-const GOOGLE_ERRORS: Record<string, string> = {
-  google_unavailable: 'Google sign-in isn’t configured on this server — use your email and password.',
-  google_state: 'The Google sign-in expired. Try again.',
-  google_failed: 'Google sign-in failed. Try again.',
-  google_email_unverified: 'Your Google account’s email isn’t verified, so we can’t use it to sign you in.',
-};
+const GOOGLE_ERRORS = ['google_unavailable', 'google_state', 'google_failed', 'google_email_unverified'] as const;
 
 export function GoogleButton({ next }: { next?: string }) {
+  const { t } = useI18n();
   return (
     <a href={`/api/auth/google?next=${encodeURIComponent(safeNext(next))}`} className="btn btn-secondary w-full !bg-white !py-2.5">
       <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden>
@@ -39,16 +37,18 @@ export function GoogleButton({ next }: { next?: string }) {
         <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z" />
         <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.7-.4-3.9z" />
       </svg>
-      Continue with Google
+      {t('auth.google')}
     </a>
   );
 }
 
 export function LoginForm({ next, error: initialError }: { next?: string; error?: string }) {
   const router = useRouter();
+  const { t } = useI18n();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { busy, error, run } = useSubmit();
+  const googleError = GOOGLE_ERRORS.find((code) => code === initialError);
   return (
     <form
       className="flex flex-col gap-4"
@@ -61,17 +61,17 @@ export function LoginForm({ next, error: initialError }: { next?: string; error?
         });
       }}
     >
-      {initialError && <p className="banner banner-warn">{GOOGLE_ERRORS[initialError] ?? 'Sign-in failed. Try again.'}</p>}
+      {initialError && <p className="banner banner-warn">{googleError ? t(`auth.googleErrors.${googleError}`) : t('auth.signInFailed')}</p>}
       <GoogleButton next={next} />
       <div className="row mut !gap-3 text-[12px]">
-        <hr className="hr flex-1 !my-0" /> or <hr className="hr flex-1 !my-0" />
+        <hr className="hr flex-1 !my-0" /> {t('common.or')} <hr className="hr flex-1 !my-0" />
       </div>
       <div className="field">
-        <label htmlFor="email">Email</label>
+        <label htmlFor="email">{t('common.email')}</label>
         <input id="email" type="email" autoComplete="email" required className="input" value={email} onChange={(e) => setEmail(e.target.value)} />
       </div>
       <div className="field">
-        <label htmlFor="password">Password</label>
+        <label htmlFor="password">{t('common.password')}</label>
         <input id="password" type="password" autoComplete="current-password" required className="input" value={password} onChange={(e) => setPassword(e.target.value)} />
       </div>
       {error && (
@@ -80,16 +80,17 @@ export function LoginForm({ next, error: initialError }: { next?: string; error?
         </p>
       )}
       <button className="btn btn-primary !py-2.5" disabled={busy}>
-        {busy ? 'Signing in…' : 'Sign in'}
+        {busy ? t('auth.signingIn') : t('common.signIn')}
       </button>
       <p className="text-[13px]">
-        <Link href="/forgot-password">Forgot your password?</Link> · New here? <Link href={`/register${next ? `?next=${encodeURIComponent(next)}` : ''}`}>Create an account</Link>
+        <Link href="/forgot-password">{t('auth.forgot')}</Link> · {t('auth.newHere')} <Link href={`/register${next ? `?next=${encodeURIComponent(next)}` : ''}`}>{t('auth.createAccount')}</Link>
       </p>
     </form>
   );
 }
 
 export function RegisterForm({ next }: { next?: string }) {
+  const { t, rich } = useI18n();
   const [displayName, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -99,11 +100,11 @@ export function RegisterForm({ next }: { next?: string }) {
     return (
       <div className="banner banner-accent">
         <span>
-          Check your inbox — we sent a link to <strong>{email}</strong>. Confirming your email lets you bid and sell.
+          {rich('auth.checkInbox', { b: (s) => <strong>{s}</strong> }, { email })}
           {process.env.NODE_ENV !== 'production' && (
             <>
               {' '}
-              (Dev: open the <Link href="/dev/mailbox">dev mailbox</Link>.)
+              {rich('auth.devMailbox', { link: (s) => <Link href="/dev/mailbox">{s}</Link> })}
             </>
           )}
         </span>
@@ -123,21 +124,21 @@ export function RegisterForm({ next }: { next?: string }) {
     >
       <GoogleButton next={next} />
       <div className="row mut !gap-3 text-[12px]">
-        <hr className="hr flex-1 !my-0" /> or <hr className="hr flex-1 !my-0" />
+        <hr className="hr flex-1 !my-0" /> {t('common.or')} <hr className="hr flex-1 !my-0" />
       </div>
       <div className="field">
-        <label htmlFor="name">Your name</label>
+        <label htmlFor="name">{t('auth.yourName')}</label>
         <input id="name" autoComplete="name" required minLength={2} maxLength={60} className="input" value={displayName} onChange={(e) => setName(e.target.value)} />
       </div>
       <div className="field">
-        <label htmlFor="email">Email</label>
+        <label htmlFor="email">{t('common.email')}</label>
         <input id="email" type="email" autoComplete="email" required className="input" value={email} onChange={(e) => setEmail(e.target.value)} />
       </div>
       <div className="field">
-        <label htmlFor="password">Password</label>
+        <label htmlFor="password">{t('common.password')}</label>
         <input id="password" type="password" autoComplete="new-password" required minLength={10} className="input" value={password} onChange={(e) => setPassword(e.target.value)} aria-describedby="pw-hint" />
         <p id="pw-hint" className="hint">
-          At least 10 characters. A short phrase works well.
+          {t('auth.passwordHint')}
         </p>
       </div>
       {error && (
@@ -146,10 +147,10 @@ export function RegisterForm({ next }: { next?: string }) {
         </p>
       )}
       <button className="btn btn-primary !py-2.5" disabled={busy}>
-        {busy ? 'Creating account…' : 'Create account'}
+        {busy ? t('auth.creating') : t('auth.createAccount')}
       </button>
       <p className="text-[13px]">
-        Already have an account? <Link href="/login">Sign in</Link>
+        {t('auth.haveAccount')} <Link href="/login">{t('common.signIn')}</Link>
       </p>
     </form>
   );
@@ -157,7 +158,8 @@ export function RegisterForm({ next }: { next?: string }) {
 
 export function VerifyEmail({ token }: { token?: string }) {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(token ? null : 'This link is missing its token.');
+  const { t, error: errorText } = useI18n();
+  const [error, setError] = useState<string | null>(token ? null : t('auth.missingToken'));
   const started = useRef(false);
   useEffect(() => {
     if (!token || started.current) return;
@@ -167,22 +169,23 @@ export function VerifyEmail({ token }: { token?: string }) {
         router.push('/?verified=1');
         router.refresh();
       })
-      .catch((e) => setError(e instanceof ApiError ? e.message : 'Verification failed.'));
-  }, [token, router]);
+      .catch((e) => setError(e instanceof ApiError ? errorText(e) : t('auth.verifyFailed')));
+  }, [token, router, t, errorText]);
   return error ? (
     <p className="banner banner-danger">
-      {error} Sign in and use “Resend link” to get a fresh one.
+      {error} {t('auth.resendHint')}
     </p>
   ) : (
-    <p className="mut">Confirming your email…</p>
+    <p className="mut">{t('auth.confirmingNow')}</p>
   );
 }
 
 export function ForgotForm() {
+  const { t } = useI18n();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const { busy, error, run } = useSubmit();
-  if (sent) return <p className="banner banner-accent">If that email has an account, a reset link is on its way. It works for 30 minutes.</p>;
+  if (sent) return <p className="banner banner-accent">{t('auth.resetSent')}</p>;
   return (
     <form
       className="flex flex-col gap-4"
@@ -195,12 +198,12 @@ export function ForgotForm() {
       }}
     >
       <div className="field">
-        <label htmlFor="email">Email</label>
+        <label htmlFor="email">{t('common.email')}</label>
         <input id="email" type="email" required className="input" value={email} onChange={(e) => setEmail(e.target.value)} />
       </div>
       {error && <p className="err">{error}</p>}
       <button className="btn btn-primary" disabled={busy}>
-        Send reset link
+        {t('auth.sendReset')}
       </button>
     </form>
   );
@@ -208,9 +211,10 @@ export function ForgotForm() {
 
 export function ResetForm({ token }: { token?: string }) {
   const router = useRouter();
+  const { t } = useI18n();
   const [password, setPassword] = useState('');
   const { busy, error, run } = useSubmit();
-  if (!token) return <p className="banner banner-danger">This link is missing its token.</p>;
+  if (!token) return <p className="banner banner-danger">{t('auth.missingToken')}</p>;
   return (
     <form
       className="flex flex-col gap-4"
@@ -224,13 +228,13 @@ export function ResetForm({ token }: { token?: string }) {
       }}
     >
       <div className="field">
-        <label htmlFor="password">New password</label>
+        <label htmlFor="password">{t('auth.newPassword')}</label>
         <input id="password" type="password" autoComplete="new-password" required minLength={10} className="input" value={password} onChange={(e) => setPassword(e.target.value)} />
-        <p className="hint">Resetting signs you out on every other device.</p>
+        <p className="hint">{t('auth.resetHint')}</p>
       </div>
       {error && <p className="err">{error}</p>}
       <button className="btn btn-primary" disabled={busy}>
-        Set password and sign in
+        {t('auth.setPassword')}
       </button>
     </form>
   );

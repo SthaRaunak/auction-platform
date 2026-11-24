@@ -5,8 +5,8 @@ import { AlertTriangle, Check, Info, Lock, Share2, Star } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
+import { useI18n } from '@/i18n/client';
 import { ApiError, api } from '@/lib/client';
-import { endStamp, money } from '@/lib/format';
 import { useCountdown } from '../Countdown';
 import { useWatch } from '../WatchButton';
 
@@ -20,6 +20,7 @@ interface Props {
 
 export function BidPanel({ detail, state, yourMax, isLeader, onResult }: Props) {
   const { viewer } = detail;
+  const { t, money, num, endStamp, error: errorText } = useI18n();
   const { label: endsLabel, urgent, left } = useCountdown(state.endsAt, state.status);
   const live = state.status === 'live' && !state.hidden;
   const step = state.increment;
@@ -57,17 +58,17 @@ export function BidPanel({ detail, state, yourMax, isLeader, onResult }: Props) 
       setValue(null);
       setMessage(
         r.isLeader
-          ? { tone: 'ok', version: r.state.version, text: `Bid placed. You're the top bidder at ${money(r.state.price)} — we'll bid for you up to ${money(r.yourMax)}.` }
-          : { tone: 'warn', version: r.state.version, text: `Bid placed, but another bidder's maximum is higher. The price is now ${money(r.state.price)}.` },
+          ? { tone: 'ok', version: r.state.version, text: t('bid.placedLeader', { price: money(r.state.price), max: money(r.yourMax) }) }
+          : { tone: 'warn', version: r.state.version, text: t('bid.placedOutbid', { price: money(r.state.price) }) },
       );
     } catch (err) {
       if (err instanceof ApiError) {
         attempt.current.settled = true;
         const min = (err.details as { minimum?: number } | undefined)?.minimum;
         if (min) setAmount(min);
-        setMessage({ tone: 'err', text: min ? `${err.message} The minimum is now ${money(min)}.` : err.message });
+        setMessage({ tone: 'err', text: min ? t('bid.minimumNow', { message: errorText(err), min: money(min) }) : errorText(err) });
       } else {
-        setMessage({ tone: 'err', text: 'Network problem — your bid may not have gone through. Press Place bid again; it’s safe to retry.' });
+        setMessage({ tone: 'err', text: t('bid.network') });
       }
     } finally {
       setBusy(false);
@@ -83,24 +84,24 @@ export function BidPanel({ detail, state, yourMax, isLeader, onResult }: Props) 
       <div className="flex items-start justify-between gap-5">
         <div aria-live="polite" aria-atomic>
           <div className="mut mb-[7px] text-[11.5px]">
-            {state.status !== 'live' ? (state.finalPrice ? 'Winning bid' : 'Final price') : isLeader ? 'Your bid is on top' : state.bidCount ? 'Current bid' : 'Starting bid'} · {state.bidCount} {state.bidCount === 1 ? 'bid' : 'bids'}
+            {t(state.status !== 'live' ? (state.finalPrice ? 'bid.winningBid' : 'bid.finalPrice') : isLeader ? 'card.yourBidOnTop' : state.bidCount ? 'card.currentBid' : 'card.startingBid')} · {t('common.bids', { count: state.bidCount })}
           </div>
           <div className="num text-[38px] sm:text-[44px]">{money(state.finalPrice ?? state.price)}</div>
           {state.status === 'live' && (
             <div className="mut mt-2 text-[12.5px]">
-              Next bid {money(state.minNextBid)} · {money(step)} increments
+              {t('bid.nextBid', { amount: money(state.minNextBid), step: money(step) })}
             </div>
           )}
         </div>
         <div className="text-right">
-          <div className="mut mb-[7px] text-[11.5px]">{state.status === 'live' ? 'Ends in' : 'Ended'}</div>
+          <div className="mut mb-[7px] text-[11.5px]">{t(state.status === 'live' ? 'bid.endsIn' : 'bid.ended')}</div>
           <div className="num text-[24px] sm:text-[30px]" style={{ color: urgent ? 'var(--color-accent-800)' : undefined }} suppressHydrationWarning>
             {state.status === 'live' ? endsLabel : endStamp(detail.closedAt ?? state.endsAt)}
           </div>
           <div className="mut mt-2 text-[12px]" suppressHydrationWarning>
             {endStamp(state.endsAt)}
           </div>
-          {extended && state.status === 'live' && <div className="mt-1 text-[11px] text-accent-700">Extended by soft close</div>}
+          {extended && state.status === 'live' && <div className="mt-1 text-[11px] text-accent-700">{t('bid.extended')}</div>}
         </div>
       </div>
 
@@ -112,14 +113,12 @@ export function BidPanel({ detail, state, yourMax, isLeader, onResult }: Props) 
         <div className="mt-4">
           <div className="mb-2 flex items-center justify-between gap-3">
             <label htmlFor="max-bid" className="text-[12.5px] font-medium">
-              {isLeader ? 'Raise your maximum' : 'Your maximum bid'}
+              {t(isLeader ? 'bid.raiseMax' : 'bid.yourMax')}
             </label>
-            <span className="mut text-[11.5px]">
-              Steps of {money(step)} · min {money(minimum)}
-            </span>
+            <span className="mut text-[11.5px]">{t('bid.stepsOf', { step: money(step), min: money(minimum) })}</span>
           </div>
           <div className="stepper">
-            <button type="button" onClick={() => stepBy(-1)} disabled={amount <= minimum} aria-label="Lower bid by one increment" className="border-r border-divider">
+            <button type="button" onClick={() => stepBy(-1)} disabled={amount <= minimum} aria-label={t('bid.lower')} className="border-r border-divider">
               −
             </button>
             <div className="min-w-0 flex-1 px-1.5 text-center">
@@ -141,18 +140,18 @@ export function BidPanel({ detail, state, yourMax, isLeader, onResult }: Props) 
                 className="w-full border-0 bg-transparent p-0 pt-2 text-center text-[23px] tabular-nums tracking-[-0.02em] text-ink outline-none"
               />
               <div id="max-bid-sub" className="mut -mt-0.5 pb-1.5 text-[10.5px]">
-                {steps <= 1 ? (isLeader ? 'one increment above your current max' : 'minimum next bid') : `${steps} increments above the current bid`}
+                {steps <= 1 ? t(isLeader ? 'bid.oneAboveYours' : 'bid.minimumNext') : t('bid.stepsAbove', { count: steps })}
               </div>
             </div>
-            <button type="button" onClick={() => stepBy(1)} aria-label="Raise bid by one increment" className="border-l border-divider">
+            <button type="button" onClick={() => stepBy(1)} aria-label={t('bid.raise')} className="border-l border-divider">
               +
             </button>
           </div>
           <button type="button" className="btn btn-primary mt-[9px] w-full !py-3" onClick={placeBid} disabled={busy || typed !== null}>
-            {busy ? 'Placing bid…' : `Place bid — ${money(amount)}`}
+            {busy ? t('bid.placing') : t('bid.placeBid', { amount: money(amount) })}
           </button>
           <div className="mt-[11px] flex flex-wrap items-center gap-2">
-            <span className="mut text-[12px]">Or jump to</span>
+            <span className="mut text-[12px]">{t('bid.jumpTo')}</span>
             {[1, 2, 4].map((m) => {
               const v = Math.max(minimum, state.price + step * m);
               return (
@@ -169,7 +168,7 @@ export function BidPanel({ detail, state, yourMax, isLeader, onResult }: Props) 
             </p>
           )}
           <p className="mut mt-3 text-[12px] leading-[1.55]">
-            We’ll bid for you in {money(step)} steps up to your maximum and stop there — you’ll never pay more than you set. Bidwell’s fee is {BUYER_PREMIUM_BPS / 100}%, added at checkout. At the current bid that’s about {money(allIn)} all in.
+            {t('bid.explainer', { step: money(step), fee: num(BUYER_PREMIUM_BPS / 100), allIn: money(allIn) })}
           </p>
         </div>
       )}
@@ -178,7 +177,7 @@ export function BidPanel({ detail, state, yourMax, isLeader, onResult }: Props) 
       {detail.softCloseWindowSec > 0 && state.status === 'live' && (
         <p className="mut mt-3 flex gap-1.5 text-[11.5px] leading-[1.5]">
           <Info size={13} className="mt-0.5 flex-none" aria-hidden />
-          Soft close: a bid in the last {Math.round(detail.softCloseWindowSec / 60)} min pushes the end to {Math.round(detail.softCloseExtendSec / 60)} min after that bid, so everyone gets a fair chance to respond.
+          {t('bid.softClose', { window: Math.round(detail.softCloseWindowSec / 60), extend: Math.round(detail.softCloseExtendSec / 60) })}
         </p>
       )}
     </div>
@@ -187,13 +186,14 @@ export function BidPanel({ detail, state, yourMax, isLeader, onResult }: Props) 
 
 function StatusBanner({ detail, state, isLeader, yourMax }: { detail: AuctionDetail; state: AuctionLiveState; isLeader: boolean; yourMax: number | null }) {
   const { viewer } = detail;
+  const { t, money } = useI18n();
   const resultHref = `/lots/${detail.id}/result`;
   if (state.status === 'voided') {
     return (
       <div className="banner banner-danger mt-4">
         <AlertTriangle size={15} aria-hidden />
         <span>
-          This auction was voided by a moderator{detail.moderation ? `: ${detail.moderation.reason}` : '.'} All bids are void and deposits refunded. <Link href={resultHref}>Published record</Link>
+          {detail.moderation ? t('bid.voidedReason', { reason: detail.moderation.reason }) : t('bid.voided')} <Link href={resultHref}>{t('bid.publishedRecord')}</Link>
         </span>
       </div>
     );
@@ -205,13 +205,11 @@ function StatusBanner({ detail, state, isLeader, yourMax }: { detail: AuctionDet
         <Check size={15} aria-hidden />
         <span>
           {won
-            ? `You won this lot at ${money(state.finalPrice!)}. Payment is due within 48 hours.`
+            ? t('bid.youWon', { price: money(state.finalPrice!) })
             : state.winnerName
-              ? `Sold to ${state.winnerName} for ${money(state.finalPrice!)}.`
-              : state.bidCount
-                ? 'Ended unsold — the reserve price wasn’t met.'
-                : 'Ended with no bids.'}{' '}
-          <Link href={resultHref}>See the published result and full bid log</Link>
+              ? t('bid.soldTo', { name: state.winnerName, price: money(state.finalPrice!) })
+              : t(state.bidCount ? 'bid.reserveNotMet' : 'bid.noBids')}{' '}
+          <Link href={resultHref}>{t('bid.seeResult')}</Link>
         </span>
       </div>
     );
@@ -220,7 +218,7 @@ function StatusBanner({ detail, state, isLeader, yourMax }: { detail: AuctionDet
     return (
       <div className="banner banner-warn mt-4">
         <AlertTriangle size={15} aria-hidden />
-        <span>Bidding is paused while a moderator reviews this lot{detail.moderation ? `: ${detail.moderation.reason}` : '.'}</span>
+        <span>{detail.moderation ? t('bid.pausedReason', { reason: detail.moderation.reason }) : t('bid.paused')}</span>
       </div>
     );
   }
@@ -230,17 +228,18 @@ function StatusBanner({ detail, state, isLeader, yourMax }: { detail: AuctionDet
         <div className="banner banner-accent mt-4">
           <Check size={15} aria-hidden />
           <span>
-            You’re the top bidder — nothing to do unless someone outbids you.{yourMax ? ` Your maximum is ${money(yourMax)}.` : ''}
+            {t('bid.youLead')}
+            {yourMax ? ` ${t('bid.yourMaxIs', { amount: money(yourMax) })}` : ''}
           </span>
         </div>
       ) : viewer.bidderNo !== null ? (
         <div className="banner banner-warn mt-4">
           <AlertTriangle size={15} aria-hidden />
-          <span>You’ve been outbid{yourMax ? ` — your maximum was ${money(yourMax)}` : ''}. Raise it to get back on top.</span>
+          <span>{yourMax ? t('bid.outbidMax', { amount: money(yourMax) }) : t('bid.outbid')}</span>
         </div>
       ) : null}
       {state.hasReserve && state.bidCount > 0 && (
-        <p className={`mt-3 text-[12px] ${state.reserveMet ? 'text-accent-700' : 'mut'}`}>{state.reserveMet ? 'Reserve met — this lot will sell.' : 'Reserve not met yet — the seller has set a minimum sale price.'}</p>
+        <p className={`mt-3 text-[12px] ${state.reserveMet ? 'text-accent-700' : 'mut'}`}>{t(state.reserveMet ? 'bid.reserveMetNote' : 'bid.reserveNotYet')}</p>
       )}
     </>
   );
@@ -248,6 +247,7 @@ function StatusBanner({ detail, state, isLeader, yourMax }: { detail: AuctionDet
 
 function BidBlocker({ detail, secondsLeft }: { detail: AuctionDetail; secondsLeft: number }) {
   const router = useRouter();
+  const { t, rich, money, endStamp, error: errorText } = useI18n();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const next = encodeURIComponent(`/lots/${detail.id}`);
@@ -261,7 +261,10 @@ function BidBlocker({ detail, secondsLeft }: { detail: AuctionDetail; secondsLef
         <>
           <Lock size={15} aria-hidden />
           <span>
-            <Link href={`/login?next=${next}`}>Sign in</Link> or <Link href={`/register?next=${next}`}>create an account</Link> to bid. You pay nothing unless you win.
+            {rich('bid.signIn', {
+              signin: (s) => <Link href={`/login?next=${next}`}>{s}</Link>,
+              register: (s) => <Link href={`/register?next=${next}`}>{s}</Link>,
+            })}
           </span>
         </>,
       );
@@ -269,7 +272,7 @@ function BidBlocker({ detail, secondsLeft }: { detail: AuctionDetail; secondsLef
       return box(
         <>
           <Lock size={15} aria-hidden />
-          <span>Confirm your email address to bid — check your inbox for the link (or resend it from the bar at the top).</span>
+          <span>{t('bid.verifyEmail')}</span>
         </>,
       );
     case 'seller':
@@ -277,8 +280,8 @@ function BidBlocker({ detail, secondsLeft }: { detail: AuctionDetail; secondsLef
         <>
           <Info size={15} aria-hidden />
           <span>
-            This is your lot — sellers can’t bid on their own items. <Link href={`/lots/${detail.id}/edit`}>Edit listing</Link>
-            {detail.bidCount > 0 ? ' (key details are locked now that bids exist).' : '.'}
+            {rich('bid.ownLot', { edit: (s) => <Link href={`/lots/${detail.id}/edit`}>{s}</Link> })}
+            {detail.bidCount > 0 ? t('bid.ownLotLocked') : ''}
           </span>
         </>,
       );
@@ -286,14 +289,14 @@ function BidBlocker({ detail, secondsLeft }: { detail: AuctionDetail; secondsLef
       return box(
         <>
           <Info size={15} aria-hidden />
-          <span>Bidding opens {endStamp(detail.startsAt)}.</span>
+          <span>{t('bid.opens', { when: endStamp(detail.startsAt) })}</span>
         </>,
       );
     case 'deposit_required':
       return (
         <div className="banner banner-accent mt-4 flex-col !items-stretch">
           <span>
-            This lot needs a refundable <strong>earnest money deposit (dharauti) of {money(detail.emdAmount!)}</strong> before you can bid. If you don’t win it’s refunded when the auction closes; if you win it counts towards payment.
+            {rich('bid.depositNeeded', { b: (s) => <strong>{s}</strong> }, { amount: money(detail.emdAmount!) })}
           </span>
           <button
             type="button"
@@ -306,14 +309,14 @@ function BidBlocker({ detail, secondsLeft }: { detail: AuctionDetail; secondsLef
                 await api('POST', `/auctions/${detail.id}/deposit`);
                 router.refresh();
               } catch (e) {
-                setError(e instanceof ApiError ? e.message : 'Couldn’t take the deposit. Try again.');
+                setError(e instanceof ApiError ? errorText(e) : t('bid.depositFailed'));
                 setBusy(false);
               }
             }}
           >
-            {busy ? 'Processing…' : `Pay ${money(detail.emdAmount!)} deposit`}
+            {busy ? t('bid.processing') : t('bid.payDeposit', { amount: money(detail.emdAmount!) })}
           </button>
-          <span className="mut text-[11.5px]">Demo build: no money moves — the payment gateway is a stub (see docs/payments.md).</span>
+          <span className="mut text-[11.5px]">{t('bid.demoGateway')}</span>
           {error && <span className="err">{error}</span>}
         </div>
       );
@@ -321,7 +324,7 @@ function BidBlocker({ detail, secondsLeft }: { detail: AuctionDetail; secondsLef
       return box(
         <>
           <Info size={15} aria-hidden />
-          <span>Bidding has closed — the result is being finalised.</span>
+          <span>{t('bid.closing')}</span>
         </>,
       );
     default:
@@ -331,12 +334,13 @@ function BidBlocker({ detail, secondsLeft }: { detail: AuctionDetail; secondsLef
 
 function ActionsRow({ detail }: { detail: AuctionDetail }) {
   const { watched, busy, toggle } = useWatch(detail.id, detail.viewer.watched, detail.viewer.signedIn);
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
   return (
     <div className="mt-3.5 flex gap-[9px]">
       <button type="button" className="btn btn-secondary flex-1" onClick={toggle} disabled={busy} aria-pressed={watched}>
         <Star size={15} strokeWidth={1.5} fill={watched ? 'var(--color-accent)' : 'none'} color={watched ? 'var(--color-accent)' : 'currentColor'} aria-hidden />
-        {watched ? 'Watching' : 'Watch item'}
+        {t(watched ? 'bid.watching' : 'bid.watch')}
       </button>
       <button
         type="button"
@@ -352,7 +356,7 @@ function ActionsRow({ detail }: { detail: AuctionDetail }) {
         }}
       >
         <Share2 size={15} strokeWidth={1.5} aria-hidden />
-        {copied ? 'Link copied' : 'Share'}
+        {t(copied ? 'bid.copied' : 'bid.share')}
       </button>
     </div>
   );

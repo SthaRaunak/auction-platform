@@ -3,6 +3,7 @@
 import { Star } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useI18n } from '@/i18n/client';
 import { api } from '@/lib/client';
 
 export function useWatch(auctionId: string, initial: boolean, signedIn: boolean) {
@@ -29,6 +30,7 @@ export function useWatch(auctionId: string, initial: boolean, signedIn: boolean)
 /** Round star on the card photo (design 1a): toggles the watchlist. */
 export function WatchStar({ auctionId, watched: initial, signedIn, title }: { auctionId: string; watched: boolean; signedIn: boolean; title: string }) {
   const { watched, busy, toggle } = useWatch(auctionId, initial, signedIn);
+  const { t } = useI18n();
   return (
     <button
       type="button"
@@ -36,7 +38,7 @@ export function WatchStar({ auctionId, watched: initial, signedIn, title }: { au
       onClick={toggle}
       disabled={busy}
       aria-pressed={watched}
-      aria-label={watched ? `Remove ${title} from watchlist` : `Watch ${title}`}
+      aria-label={t(watched ? 'card.unwatch' : 'card.watch', { title })}
     >
       <Star size={15} strokeWidth={1.5} fill={watched ? 'var(--color-accent)' : 'none'} color={watched ? 'var(--color-accent)' : 'currentColor'} aria-hidden />
     </button>

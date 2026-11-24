@@ -1,11 +1,16 @@
 import { AuthShell } from '@/components/auth/AuthShell';
 import { ForgotForm } from '@/components/auth/AuthForms';
+import { getI18n } from '@/i18n/server';
 
-export const metadata = { title: 'Reset your password' };
+export async function generateMetadata() {
+  const { t } = await getI18n();
+  return { title: t('meta.forgot') };
+}
 
-export default function ForgotPage() {
+export default async function ForgotPage() {
+  const { t } = await getI18n();
   return (
-    <AuthShell title="Reset your password" lead="We’ll email you a link to choose a new one.">
+    <AuthShell title={t('meta.forgot')} lead={t('auth.forgotLead')}>
       <ForgotForm />
     </AuthShell>
   );

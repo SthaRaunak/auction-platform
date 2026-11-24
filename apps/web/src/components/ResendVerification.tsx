@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { useI18n } from '@/i18n/client';
 import { api } from '@/lib/client';
 
 export function ResendVerification() {
+  const { t } = useI18n();
   const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
-  if (state === 'sent') return <span className="mut">Sent — check your inbox.</span>;
+  if (state === 'sent') return <span className="mut">{t('nav.resent')}</span>;
   return (
     <button
       type="button"
@@ -21,7 +23,7 @@ export function ResendVerification() {
         }
       }}
     >
-      {state === 'error' ? 'Couldn’t send — try again' : 'Resend link'}
+      {state === 'error' ? t('nav.resendFailed') : t('nav.resend')}
     </button>
   );
 }

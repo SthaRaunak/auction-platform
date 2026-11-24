@@ -2,23 +2,26 @@
 
 import type { AuctionStatus } from '@bidwell/contract';
 import { Clock } from 'lucide-react';
-import { countdown, isUrgent, secondsUntil } from '@/lib/format';
+import { useI18n } from '@/i18n/client';
+import { isUrgent, secondsUntil } from '@/lib/format';
 import { useNow } from './Clock';
 
 export function useCountdown(endsAt: string, status: AuctionStatus = 'live') {
   const now = useNow();
+  const { t, countdown } = useI18n();
   const left = secondsUntil(endsAt, now);
   const ended = status !== 'live';
   return {
     left,
     urgent: !ended && isUrgent(left),
-    label: status === 'voided' ? 'Voided' : ended ? 'Ended' : left <= 0 ? 'Closing…' : countdown(left),
+    label: status === 'voided' ? t('countdown.voided') : ended ? t('countdown.ended') : left <= 0 ? t('countdown.closing') : countdown(left),
   };
 }
 
 /** Photo-overlay chip: white normally, accent-900 under the urgency threshold. */
 export function CountdownChip({ endsAt, status }: { endsAt: string; status: AuctionStatus }) {
   const { urgent, label } = useCountdown(endsAt, status);
+  const { t } = useI18n();
   return (
     <span
       className="row absolute left-2.5 top-2.5 !gap-1.5 rounded-full border px-[11px] py-[5px] text-[12px] tabular-nums"
@@ -30,7 +33,7 @@ export function CountdownChip({ endsAt, status }: { endsAt: string; status: Auct
     >
       <Clock size={13} strokeWidth={1.5} aria-hidden />
       <span suppressHydrationWarning>{label}</span>
-      {urgent && <span className="sr-only">(ending soon)</span>}
+      {urgent && <span className="sr-only">{t('countdown.endingSoon')}</span>}
     </span>
   );
 }

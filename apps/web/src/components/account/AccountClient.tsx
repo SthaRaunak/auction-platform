@@ -3,11 +3,12 @@
 import type { MyModerationAction } from '@bidwell/contract';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useI18n } from '@/i18n/client';
 import { ApiError, api } from '@/lib/client';
-import { fullStamp } from '@/lib/format';
 
 export function SignOutButtons() {
   const router = useRouter();
+  const { t } = useI18n();
   const out = async (path: string) => {
     await api('POST', path);
     router.push('/');
@@ -16,19 +17,20 @@ export function SignOutButtons() {
   return (
     <div className="flex flex-wrap gap-2">
       <button type="button" className="btn btn-secondary" onClick={() => out('/auth/logout')}>
-        Sign out
+        {t('account.signOut')}
       </button>
       <button type="button" className="btn btn-secondary" onClick={() => out('/auth/logout-all')}>
-        Sign out everywhere
+        {t('account.signOutAll')}
       </button>
     </div>
   );
 }
 
-const ACTION_LABEL: Record<string, string> = { 'auction.hidden': 'Hidden for review', 'auction.voided': 'Voided' };
+const ACTION_LABEL = { 'auction.hidden': 'account.actionHidden', 'auction.voided': 'account.actionVoided' } as const;
 
 export function ModerationActions({ items }: { items: MyModerationAction[] }) {
-  if (!items.length) return <p className="mut text-[14px]">No moderation actions have been taken on your lots.</p>;
+  const { t, rich, fullStamp } = useI18n();
+  if (!items.length) return <p className="mut text-[14px]">{t('account.noActions')}</p>;
   return (
     <ul className="flex flex-col gap-3">
       {items.map((a) => (
@@ -40,12 +42,12 @@ export function ModerationActions({ items }: { items: MyModerationAction[] }) {
             <span className="mut text-[12px]">{fullStamp(a.at)}</span>
           </div>
           <div className="text-[13px]">
-            <span className="tag tag-warn mr-2">{ACTION_LABEL[a.action] ?? a.action}</span>
+            <span className="tag tag-warn mr-2">{a.action in ACTION_LABEL ? t(ACTION_LABEL[a.action as keyof typeof ACTION_LABEL]) : a.action}</span>
             {a.reason}
           </div>
           {a.appeal ? (
             <p className="text-[13px]">
-              Appeal: <strong>{a.appeal.status === 'open' ? 'under review' : a.appeal.status === 'overturned' ? 'decision overturned' : 'decision upheld'}</strong>
+              {rich('account.appeal', { b: (s) => <strong>{s}</strong> }, { status: t(a.appeal.status === 'open' ? 'account.appealOpen' : a.appeal.status === 'overturned' ? 'account.appealOverturned' : 'account.appealUpheld') })}
               {a.appeal.resolutionNote ? ` — ${a.appeal.resolutionNote}` : ''}
             </p>
           ) : (
@@ -59,13 +61,14 @@ export function ModerationActions({ items }: { items: MyModerationAction[] }) {
 
 function AppealForm({ actionId }: { actionId: string }) {
   const router = useRouter();
+  const { t, error: errorText } = useI18n();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
   if (!open)
     return (
       <button type="button" className="btn btn-ghost self-start" onClick={() => setOpen(true)}>
-        Appeal this decision
+        {t('account.appealButton')}
       </button>
     );
   return (
@@ -77,16 +80,16 @@ function AppealForm({ actionId }: { actionId: string }) {
           await api('POST', '/appeals', { actionId, text });
           router.refresh();
         } catch (err) {
-          setError(err instanceof ApiError ? err.message : 'Couldn’t file the appeal.');
+          setError(err instanceof ApiError ? errorText(err) : t('account.appealFailed'));
         }
       }}
     >
       <label htmlFor={`appeal-${actionId}`} className="label">
-        Why should this be reconsidered? A different moderator will review it.
+        {t('account.appealLabel')}
       </label>
       <textarea id={`appeal-${actionId}`} className="input" required minLength={10} value={text} onChange={(e) => setText(e.target.value)} />
       {error && <p className="err">{error}</p>}
-      <button className="btn btn-primary self-start">File appeal</button>
+      <button className="btn btn-primary self-start">{t('account.fileAppeal')}</button>
     </form>
   );
 }

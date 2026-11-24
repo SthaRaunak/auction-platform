@@ -1,10 +1,13 @@
 import type { Me } from '@bidwell/contract';
 import { Search, Star } from 'lucide-react';
 import Link from 'next/link';
+import { LocaleToggle } from '@/i18n/client';
+import { getI18n } from '@/i18n/server';
 import { Avatar } from './Avatar';
 import { ResendVerification } from './ResendVerification';
 
-export function Nav({ me, q }: { me: Me | null; q?: string }) {
+export async function Nav({ me, q }: { me: Me | null; q?: string }) {
+  const { t, rich } = await getI18n();
   const staff = me?.role === 'moderator' || me?.role === 'admin';
   return (
     <>
@@ -16,25 +19,25 @@ export function Nav({ me, q }: { me: Me | null; q?: string }) {
           <form action="/" role="search" className="relative order-last flex w-full items-center sm:order-none sm:w-auto sm:max-w-[420px] sm:flex-1">
             <Search size={16} strokeWidth={1.5} className="pointer-events-none absolute left-[13px] opacity-50" aria-hidden />
             <label htmlFor="nav-search" className="sr-only">
-              Search lots
+              {t('nav.search')}
             </label>
-            <input id="nav-search" name="q" defaultValue={q} className="input !rounded-full !pl-[38px]" type="search" placeholder="Search live lots" />
+            <input id="nav-search" name="q" defaultValue={q} className="input !rounded-full !pl-[38px]" type="search" placeholder={t('nav.searchPlaceholder')} />
           </form>
           <nav className="ml-auto flex items-center gap-[18px]" aria-label="Main">
             <Link href="/how-bidding-works" className="navlink hidden md:inline">
-              How bidding works?
+              {t('nav.howBidding')}
             </Link>
             {staff && (
               <Link href="/moderation" className="navlink">
-                Moderation
+                {t('nav.moderation')}
               </Link>
             )}
             <Link href="/sell" className="btn btn-primary btn-pill">
-              Sell an item
+              {t('nav.sell')}
             </Link>
             {me ? (
               <>
-                <Link href="/account?tab=watching" className="navlink row !gap-[7px] text-[13px]" aria-label={`Watchlist, ${me.watchCount} lots`}>
+                <Link href="/account?tab=watching" className="navlink row !gap-[7px] text-[13px]" aria-label={t('nav.watchlist', { count: me.watchCount })}>
                   <Star size={16} strokeWidth={1.5} aria-hidden />
                   {me.watchCount}
                 </Link>
@@ -45,16 +48,17 @@ export function Nav({ me, q }: { me: Me | null; q?: string }) {
               </>
             ) : (
               <Link href="/login" className="navlink text-[13px]">
-                Sign in
+                {t('common.signIn')}
               </Link>
             )}
+            <LocaleToggle />
           </nav>
         </div>
       </header>
       {me && !me.emailVerified && (
         <div className="border-b border-divider bg-accent-100">
           <div className="mx-auto flex max-w-[1240px] flex-wrap items-center gap-3 px-6 py-2.5 text-[13px]">
-            <span>Confirm your email to bid and sell — we sent a link to <strong>{me.email}</strong>.</span>
+            <span>{rich('nav.verifyBanner', { b: (s) => <strong>{s}</strong> }, { email: me.email })}</span>
             <ResendVerification />
           </div>
         </div>

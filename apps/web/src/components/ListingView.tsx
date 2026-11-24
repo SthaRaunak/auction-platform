@@ -1,11 +1,11 @@
 'use client';
 
-import { CATEGORIES, CONDITIONS, ENDING_WINDOWS, SORTS, categoryLabel, conditionLabel, parseMajorInput, toMajor, type AuctionList, type BrandFacet, type MarketStats } from '@bidwell/contract';
+import { CATEGORIES, CONDITIONS, ENDING_WINDOWS, SORTS, parseMajorInput, toMajor, type AuctionList, type BrandFacet, type MarketStats } from '@bidwell/contract';
 import { ChevronDown, SlidersHorizontal, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { money } from '@/lib/format';
+import { useI18n } from '@/i18n/client';
 import { CategoryRail } from './CategoryRail';
 import { LotCard } from './LotCard';
 
@@ -13,10 +13,7 @@ type Params = Record<string, string>;
 
 const PAGE_SIZE = 12;
 const POLL_MS = 5000;
-const DELIVERY_FILTERS = [
-  { value: 'free_shipping', label: 'Delivered by department' },
-  { value: 'local_pickup', label: 'Lift from site' },
-];
+const DELIVERY_FILTERS = ['free_shipping', 'local_pickup'];
 
 const csv = (v?: string) => (v ? v.split(',').filter(Boolean) : []);
 
@@ -32,6 +29,8 @@ function buildHref(params: Params, patch: Record<string, string | undefined>, ke
 
 export function ListingView({ params, initial, brands, stats: initialStats, signedIn }: { params: Params; initial: AuctionList; brands: BrandFacet[]; stats: MarketStats; signedIn: boolean }) {
   const router = useRouter();
+  const i18n = useI18n();
+  const { t, money, num } = i18n;
   const [list, setList] = useState(initial);
   const [stats, setStats] = useState(initialStats);
   const [allBrands, setAllBrands] = useState(false);
@@ -68,23 +67,23 @@ export function ListingView({ params, initial, brands, stats: initialStats, sign
 
   const chips: { label: string; href: string }[] = [];
   if (params.q) chips.push({ label: `“${params.q}”`, href: buildHref(params, { q: undefined }) });
-  if (params.category) chips.push({ label: categoryLabel(params.category), href: buildHref(params, { category: undefined, brand: undefined }) });
+  if (params.category) chips.push({ label: i18n.category(params.category), href: buildHref(params, { category: undefined, brand: undefined }) });
   for (const b of csv(params.brand)) chips.push({ label: b, href: buildHref(params, { brand: csv(params.brand).filter((x) => x !== b).join(',') || undefined }) });
-  for (const c of csv(params.condition)) chips.push({ label: conditionLabel(c), href: buildHref(params, { condition: csv(params.condition).filter((x) => x !== c).join(',') || undefined }) });
-  for (const d of csv(params.delivery)) chips.push({ label: DELIVERY_FILTERS.find((x) => x.value === d)?.label ?? d, href: buildHref(params, { delivery: csv(params.delivery).filter((x) => x !== d).join(',') || undefined }) });
-  if (params.ending) chips.push({ label: `Ending ${ENDING_WINDOWS.find((e) => e.value === params.ending)?.label.toLowerCase()}`, href: buildHref(params, { ending: undefined }) });
+  for (const c of csv(params.condition)) chips.push({ label: i18n.condition(c), href: buildHref(params, { condition: csv(params.condition).filter((x) => x !== c).join(',') || undefined }) });
+  for (const d of csv(params.delivery)) chips.push({ label: i18n.delivery(d), href: buildHref(params, { delivery: csv(params.delivery).filter((x) => x !== d).join(',') || undefined }) });
+  if (params.ending) chips.push({ label: t('listing.endingChip', { window: i18n.ending(params.ending).toLowerCase() }), href: buildHref(params, { ending: undefined }) });
   if (params.minPrice || params.maxPrice) {
-    const lo = params.minPrice ? money(Number(params.minPrice)) : 'Rs. 0';
-    const hi = params.maxPrice ? money(Number(params.maxPrice)) : 'any';
+    const lo = money(Number(params.minPrice ?? 0));
+    const hi = params.maxPrice ? money(Number(params.maxPrice)) : t('listing.anyPrice');
     chips.push({ label: `${lo} – ${hi}`, href: buildHref(params, { minPrice: undefined, maxPrice: undefined }) });
   }
-  if (params.minRating) chips.push({ label: `Seller ${params.minRating}+`, href: buildHref(params, { minRating: undefined }) });
+  if (params.minRating) chips.push({ label: t('listing.sellerRatingChip', { rating: i18n.digits(params.minRating) }), href: buildHref(params, { minRating: undefined }) });
 
   const categoryHrefs = Object.fromEntries(CATEGORIES.map((c) => [c.slug, buildHref(params, { category: params.category === c.slug ? undefined : c.slug, brand: undefined })]));
   const page = Number(params.page ?? 1);
   const pages = Math.max(1, Math.ceil(list.total / PAGE_SIZE));
   const shownBrands = allBrands ? brands : brands.slice(0, 4);
-  const title = params.q ? `Results for “${params.q}”` : params.category ? categoryLabel(params.category) : 'All auctions';
+  const title = params.q ? t('listing.resultsFor', { q: params.q }) : params.category ? i18n.category(params.category) : t('listing.allAuctions');
 
   const applyPrice = () => {
     const lo = parseMajorInput(minPrice);
@@ -99,19 +98,19 @@ export function ListingView({ params, initial, brands, stats: initialStats, sign
           <div>
             <nav aria-label="Breadcrumb" className="row !gap-[7px] text-[11.5px]" style={{ color: 'color-mix(in srgb, var(--color-text) 55%, transparent)' }}>
               <Link href="/" className="text-inherit" style={{ color: 'inherit' }}>
-                Home
+                {t('common.home')}
               </Link>
               <span aria-hidden>/</span>
-              <span>{params.category ? categoryLabel(params.category) : 'All auctions'}</span>
+              <span>{params.category ? i18n.category(params.category) : t('listing.allAuctions')}</span>
             </nav>
             <h1 className="ttl mt-[7px] text-[34px] tracking-[-0.015em] sm:text-[44px]">{title}</h1>
           </div>
           <dl className="row !items-end !gap-[18px]">
-            <Stat label="Open lots" value={stats.openLots.toLocaleString('en-IN')} />
+            <Stat label={t('listing.openLots')} value={num(stats.openLots)} />
             <span className="h-[34px] w-px bg-divider" aria-hidden />
-            <Stat label="Ending < 1 hr" value={stats.endingWithinHour.toLocaleString('en-IN')} accent />
+            <Stat label={t('listing.endingHour')} value={num(stats.endingWithinHour)} accent />
             <span className="h-[34px] w-px bg-divider" aria-hidden />
-            <Stat label="Bids / min" value={String(stats.bidsPerMinute)} />
+            <Stat label={t('listing.bidsPerMin')} value={num(stats.bidsPerMinute)} />
           </dl>
         </div>
 
@@ -119,77 +118,76 @@ export function ListingView({ params, initial, brands, stats: initialStats, sign
 
         {chips.length > 0 && (
           <div className="mt-[18px] flex flex-wrap items-center gap-[9px]">
-            <span className="mut text-[12px]">
-              {chips.length} {chips.length === 1 ? 'filter' : 'filters'} on
-            </span>
+            <span className="mut text-[12px]">{t('listing.filtersOn', { count: chips.length })}</span>
             {chips.map((c) => (
-              <Link key={c.label} href={c.href} scroll={false} className="pill on" aria-label={`Remove filter ${c.label}`}>
+              <Link key={c.label} href={c.href} scroll={false} className="pill on" aria-label={t('listing.removeFilter', { label: c.label })}>
                 {c.label}
                 <X size={12} strokeWidth={2} aria-hidden />
               </Link>
             ))}
             <Link href="/" className="text-[12px]">
-              Clear all
+              {t('listing.clearAll')}
             </Link>
           </div>
         )}
       </div>
 
       <div className="mx-auto mt-5 grid max-w-[1240px] border-t border-divider lg:grid-cols-[258px_1fr]">
-        <aside className="border-divider px-5 pb-6 pt-5 lg:border-r lg:pb-10" aria-label="Filters">
+        <aside className="border-divider px-5 pb-6 pt-5 lg:border-r lg:pb-10" aria-label={t('listing.filters')}>
           <button type="button" className="btn btn-secondary btn-pill lg:!hidden" aria-expanded={filtersOpen} onClick={() => setFiltersOpen((o) => !o)}>
-            <SlidersHorizontal size={15} strokeWidth={1.5} aria-hidden /> Filters{chips.length ? ` · ${chips.length}` : ''}
+            <SlidersHorizontal size={15} strokeWidth={1.5} aria-hidden /> {t('listing.filters')}
+            {chips.length ? ` · ${num(chips.length)}` : ''}
           </button>
           <div className={`${filtersOpen ? 'block' : 'hidden'} mt-4 lg:mt-0 lg:block`}>
             <div className="mb-3.5 flex items-baseline justify-between">
-              <span className="k">Filters · {chips.length} on</span>
+              <span className="k">{t('listing.filtersHeading', { count: chips.length })}</span>
               <Link href={params.category ? `/?category=${params.category}` : '/'} className="text-[11.5px]">
-                Clear
+                {t('listing.clear')}
               </Link>
             </div>
 
             <fieldset>
-              <legend className="mb-[7px] text-[11px] font-medium uppercase tracking-[.09em] text-accent-700">Make / brand</legend>
-              {brands.length === 0 && <p className="mut text-[12.5px]">No makes listed in these results.</p>}
+              <legend className="mb-[7px] text-[11px] font-medium uppercase tracking-[.09em] text-accent-700">{t('listing.brand')}</legend>
+              {brands.length === 0 && <p className="mut text-[12.5px]">{t('listing.noBrands')}</p>}
               {shownBrands.map((b) => (
                 <label key={b.brand} className="chk">
                   <input type="checkbox" checked={csv(params.brand).includes(b.brand)} onChange={() => toggleIn('brand', b.brand)} />
                   <i />
                   <span className="flex-1">{b.brand}</span>
-                  <span className="mut text-[11.5px]">{b.count}</span>
+                  <span className="mut text-[11.5px]">{num(b.count)}</span>
                 </label>
               ))}
               {brands.length > 4 && (
                 <button type="button" className="mt-1.5 inline-block cursor-pointer border-0 bg-transparent p-0 text-[11.5px] text-accent-700 underline underline-offset-[3px]" onClick={() => setAllBrands((v) => !v)}>
-                  {allBrands ? 'Show fewer' : `Show ${brands.length - 4} more`}
+                  {allBrands ? t('listing.showFewer') : t('listing.showMore', { count: brands.length - 4 })}
                 </button>
               )}
             </fieldset>
             <hr className="hr" />
-            <CheckGroup legend="Condition" options={CONDITIONS} selected={csv(params.condition)} onToggle={(v) => toggleIn('condition', v)} />
+            <CheckGroup legend={t('listing.condition')} options={CONDITIONS.map((c) => ({ value: c.value, label: i18n.condition(c.value) }))} selected={csv(params.condition)} onToggle={(v) => toggleIn('condition', v)} />
             <hr className="hr" />
-            <CheckGroup legend="Delivery" options={DELIVERY_FILTERS} selected={csv(params.delivery)} onToggle={(v) => toggleIn('delivery', v)} />
+            <CheckGroup legend={t('listing.delivery')} options={DELIVERY_FILTERS.map((d) => ({ value: d, label: i18n.delivery(d) }))} selected={csv(params.delivery)} onToggle={(v) => toggleIn('delivery', v)} />
             <hr className="hr" />
-            <CheckGroup legend="Ending" options={ENDING_WINDOWS} selected={params.ending ? [params.ending] : []} onToggle={(v) => go({ ending: params.ending === v ? undefined : v })} />
+            <CheckGroup legend={t('listing.ending')} options={ENDING_WINDOWS.map((e) => ({ value: e.value, label: i18n.ending(e.value) }))} selected={params.ending ? [params.ending] : []} onToggle={(v) => go({ ending: params.ending === v ? undefined : v })} />
             <hr className="hr" />
             <fieldset>
-              <legend className="mb-[9px] text-[11px] font-medium uppercase tracking-[.09em] text-accent-700">Current bid (Rs.)</legend>
+              <legend className="mb-[9px] text-[11px] font-medium uppercase tracking-[.09em] text-accent-700">{t('listing.priceRange')}</legend>
               <div className="row !gap-2">
-                <input className="input" inputMode="numeric" placeholder="Min" aria-label="Minimum current bid in rupees" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && applyPrice()} />
+                <input className="input" inputMode="numeric" placeholder={t('listing.min')} aria-label={t('listing.minAria')} value={minPrice} onChange={(e) => setMinPrice(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && applyPrice()} />
                 <span className="mut" aria-hidden>
                   —
                 </span>
-                <input className="input" inputMode="numeric" placeholder="Max" aria-label="Maximum current bid in rupees" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && applyPrice()} />
+                <input className="input" inputMode="numeric" placeholder={t('listing.max')} aria-label={t('listing.maxAria')} value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && applyPrice()} />
               </div>
             </fieldset>
             <hr className="hr" />
             <fieldset>
-              <legend className="mb-[9px] text-[11px] font-medium uppercase tracking-[.09em] text-accent-700">Seller rating</legend>
+              <legend className="mb-[9px] text-[11px] font-medium uppercase tracking-[.09em] text-accent-700">{t('listing.sellerRating')}</legend>
               <span className="seg w-full">
                 {[
-                  { v: '', l: 'Any' },
-                  { v: '4', l: '4.0+' },
-                  { v: '4.5', l: '4.5+' },
+                  { v: '', l: t('listing.any') },
+                  { v: '4', l: `${i18n.digits('4.0')}+` },
+                  { v: '4.5', l: `${i18n.digits('4.5')}+` },
                 ].map((o) => (
                   <label key={o.l} className="seg-opt flex-1">
                     <input type="radio" name="rating" checked={(params.minRating ?? '') === o.v} onChange={() => go({ minRating: o.v || undefined })} />
@@ -199,19 +197,19 @@ export function ListingView({ params, initial, brands, stats: initialStats, sign
               </span>
             </fieldset>
             <button type="button" className="btn btn-primary btn-block mt-[18px]" onClick={applyPrice}>
-              Show results
+              {t('listing.showResults')}
             </button>
           </div>
         </aside>
 
-        <section className="px-6 pb-[34px] pt-[18px]" aria-label="Lots">
+        <section className="px-6 pb-[34px] pt-[18px]" aria-label={t('listing.lotsLabel')}>
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-divider pb-3.5">
             <span className="text-[13px]" aria-live="polite">
-              <strong>{list.total.toLocaleString('en-IN')} {list.total === 1 ? 'lot' : 'lots'}</strong> <span className="mut">· {list.endingWithinHour} ending in the next hour</span>
+              <strong>{t('common.lots', { count: list.total })}</strong> <span className="mut">· {t('listing.endingNextHour', { count: list.endingWithinHour })}</span>
             </span>
             <span className="row !gap-2">
               <label htmlFor="sort" className="mut text-[12.5px]">
-                Sort by
+                {t('listing.sortBy')}
               </label>
               <span className="relative inline-flex items-center">
                 <select
@@ -222,7 +220,7 @@ export function ListingView({ params, initial, brands, stats: initialStats, sign
                 >
                   {SORTS.map((s) => (
                     <option key={s.value} value={s.value}>
-                      {s.label}
+                      {i18n.sort(s.value)}
                     </option>
                   ))}
                 </select>
@@ -233,7 +231,7 @@ export function ListingView({ params, initial, brands, stats: initialStats, sign
 
           {list.items.length === 0 ? (
             <div className="mut py-16 text-center text-[14px]">
-              No live lots match these filters. <Link href="/">Clear filters</Link>
+              {t('listing.empty')} <Link href="/">{t('listing.clearFilters')}</Link>
             </div>
           ) : (
             <div className="mt-[26px] grid gap-[26px] sm:grid-cols-2 xl:grid-cols-3">
@@ -244,21 +242,21 @@ export function ListingView({ params, initial, brands, stats: initialStats, sign
           )}
 
           {(page > 1 || list.nextCursor) && (
-            <nav aria-label="Pagination" className="row mt-[30px] !justify-center !gap-2">
+            <nav aria-label={t('listing.pagination')} className="row mt-[30px] !justify-center !gap-2">
               <button type="button" className="btn btn-secondary" disabled={page <= 1} onClick={() => router.back()}>
-                Previous
+                {t('listing.previous')}
               </button>
               <span className="btn btn-primary min-w-[38px]" aria-current="page">
-                {page}
+                {num(page)}
               </span>
-              <span className="mut px-1.5 text-[12.5px]">of {pages}</span>
+              <span className="mut px-1.5 text-[12.5px]">{t('listing.ofPages', { count: pages })}</span>
               {list.nextCursor ? (
                 <Link className="btn btn-secondary" href={buildHref(params, { cursor: list.nextCursor, page: String(page + 1) }, true)}>
-                  Next
+                  {t('listing.next')}
                 </Link>
               ) : (
                 <button type="button" className="btn btn-secondary" disabled>
-                  Next
+                  {t('listing.next')}
                 </button>
               )}
             </nav>

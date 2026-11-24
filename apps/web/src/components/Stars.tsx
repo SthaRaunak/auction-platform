@@ -1,10 +1,14 @@
+'use client';
+
 import { Star } from 'lucide-react';
+import { useI18n } from '@/i18n/client';
 
 /** Five stars, filled to the nearest half. Always paired with a text value, never colour alone (E8). */
 export function Stars({ value, size = 14 }: { value: number; size?: number }) {
+  const { t, num } = useI18n();
   const rounded = Math.round(value * 2) / 2;
   return (
-    <span className="inline-flex items-center gap-[2px] align-[-2px]" role="img" aria-label={`${value.toFixed(1)} out of 5 stars`}>
+    <span className="inline-flex items-center gap-[2px] align-[-2px]" role="img" aria-label={t('review.outOf5', { value: num(value, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) })}>
       {[1, 2, 3, 4, 5].map((n) => {
         const fill = rounded >= n ? 1 : rounded >= n - 0.5 ? 0.5 : 0;
         return (
