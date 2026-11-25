@@ -5,7 +5,7 @@ import { useI18n } from '@/i18n/client';
 import { useNow } from '../Clock';
 import type { Connection } from './useLiveAuction';
 
-export function BidFeed({ feed, freshKeys, viewerNo, connection, live, bidCount, resultHref }: { feed: FeedEntry[]; freshKeys: string[]; viewerNo: number | null; connection: Connection; live: boolean; bidCount: number; resultHref: string }) {
+export function BidFeed({ feed, freshKeys, viewerNo, connection, live, bidCount, masked, resultHref }: { feed: FeedEntry[]; freshKeys: string[]; viewerNo: number | null; connection: Connection; live: boolean; bidCount: number; masked: boolean; resultHref: string }) {
   const now = useNow();
   const { t, money, ago, digits } = useI18n();
   return (
@@ -54,7 +54,7 @@ export function BidFeed({ feed, freshKeys, viewerNo, connection, live, bidCount,
       )}
       <div className="px-4 py-[11px] text-[12px]">
         {live ? (
-          <span className="mut">{t('feed.liveNote', { bids: t('common.bids', { count: bidCount }) })}</span>
+          <span className="mut">{t(masked ? 'feed.liveNote' : 'feed.liveNotePublic', { bids: t('common.bids', { count: bidCount }) })}</span>
         ) : (
           <a href={resultHref}>{t('feed.fullLog', { bids: t('common.bids', { count: bidCount }) })}</a>
         )}

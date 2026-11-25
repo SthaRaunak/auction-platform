@@ -64,6 +64,13 @@
       "when": 1795534491347,
       "tag": "0008_nepali_text",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795549422700,
+      "tag": "0009_bidder_names",
+      "breakpoints": true
     }
   ]
 }

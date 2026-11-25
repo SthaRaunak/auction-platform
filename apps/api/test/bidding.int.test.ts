@@ -1,7 +1,8 @@
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from '@/db';
 import { auctions } from '@/modules/auction/auction.schema';
+import { updateAuction } from '@/modules/auction/auction.usecase';
 import { bids } from '@/modules/bid/bid.schema';
 import { closeAuction, getAuctionDetail, getAuctionResult, placeBid, verifyAuctionChain } from '@/modules/bid/bid.usecase';
 import { outbox } from '@/modules/outbox/outbox.schema';
@@ -107,6 +108,57 @@ describe('place bid — one transaction', () => {
     const eve = await makeUser({ emailVerifiedAt: null });
     const a = await makeAuction(seller);
     await expect(placeBid(eve, a.id, { maxAmount: 40_000, idempotencyKey: key() }, meta)).rejects.toMatchObject({ code: 'EMAIL_UNVERIFIED' });
+  });
+});
+
+describe('bidder names while live (E5)', () => {
+  // Only the state broadcasts carry a feed; 'auction.outbid' is an email trigger.
+  const stateEvents = (auctionId: string) => db.select().from(outbox).where(and(eq(outbox.aggregateId, auctionId), eq(outbox.topic, 'auction.state'))).orderBy(outbox.id);
+  const feedNames = (payload: unknown) => (payload as { feed: { name: string | null }[] }).feed.map((f) => f.name);
+
+  it('masks bidders as "Bidder #N" by default, in the page data and the broadcast', async () => {
+    const seller = await makeUser();
+    const [alice, bob] = [await makeUser(), await makeUser()];
+    const a = await makeAuction(seller);
+    await placeBid(alice, a.id, { maxAmount: 20_000, idempotencyKey: key() }, meta);
+    await placeBid(bob, a.id, { maxAmount: 30_000, idempotencyKey: key() }, meta);
+
+    const detail = await getAuctionDetail(a.id, null);
+    expect(detail.maskBidders).toBe(true);
+    expect(detail.feed.map((f) => f.name)).toEqual([null, null, null]);
+    const events = await stateEvents(a.id);
+    expect(events.flatMap((e) => feedNames(e.payload))).toEqual([null, null, null]);
+    expect(JSON.stringify(events.map((e) => e.payload))).not.toContain(alice.displayName);
+  });
+
+  it('a seller can make names public: they appear live, but never user ids or maximums', async () => {
+    const seller = await makeUser();
+    const [alice, bob] = [await makeUser(), await makeUser()];
+    const a = await makeAuction(seller, { maskBidders: false });
+    await placeBid(alice, a.id, { maxAmount: 20_000, idempotencyKey: key() }, meta);
+    await placeBid(bob, a.id, { maxAmount: 30_000, idempotencyKey: key() }, meta);
+
+    const detail = await getAuctionDetail(a.id, null);
+    // Newest first: bob's bid, alice's proxy answering it, alice's opening bid.
+    expect(detail.feed.map((f) => [f.name, f.bidderNo, f.kind])).toEqual([
+      [bob.displayName, 2, 'bid'],
+      [alice.displayName, 1, 'auto'],
+      [alice.displayName, 1, 'bid'],
+    ]);
+    const events = await stateEvents(a.id);
+    expect(events.flatMap((e) => feedNames(e.payload))).toEqual([alice.displayName, alice.displayName, bob.displayName]);
+    const payloads = JSON.stringify(events.map((e) => e.payload));
+    expect(payloads).not.toContain(alice.id);
+    expect(payloads).not.toContain('30000'); // bob's sealed maximum
+  });
+
+  it('the choice locks with the first bid, so nobody bidding anonymously is unmasked later', async () => {
+    const seller = await makeUser();
+    const a = await makeAuction(seller);
+    await updateAuction(seller, a.id, { maskBidders: false });
+    await updateAuction(seller, a.id, { maskBidders: true });
+    await placeBid(await makeUser(), a.id, { maxAmount: 20_000, idempotencyKey: key() }, meta);
+    await expect(updateAuction(seller, a.id, { maskBidders: false })).rejects.toMatchObject({ code: 'MATERIAL_FIELDS_FROZEN', details: { fields: ['maskBidders'] } });
   });
 });
 

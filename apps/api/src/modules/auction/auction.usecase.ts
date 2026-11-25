@@ -239,6 +239,7 @@ export async function createAuction(user: UserRow, input: AuctionCreateInput) {
     originalEndsAt: endsAt,
     softCloseWindowSec: input.softCloseWindowSec ?? 120,
     softCloseExtendSec: input.softCloseExtendSec ?? 120,
+    maskBidders: input.maskBidders ?? true,
     currentPrice: input.startPrice,
   };
   return insertAuction(db, row);

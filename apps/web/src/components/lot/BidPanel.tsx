@@ -167,6 +167,12 @@ export function BidPanel({ detail, state, yourMax, isLeader, onResult }: Props) 
               {showMessage.text}
             </p>
           )}
+          {!detail.maskBidders && (
+            <p className="mt-3 flex gap-1.5 text-[12px] leading-[1.5] text-accent-700">
+              <Info size={13} className="mt-0.5 flex-none" aria-hidden />
+              {t('bid.publicNames')}
+            </p>
+          )}
           <p className="mut mt-3 text-[12px] leading-[1.55]">
             {t('bid.explainer', { step: money(step), fee: num(BUYER_PREMIUM_BPS / 100), allIn: money(allIn) })}
           </p>

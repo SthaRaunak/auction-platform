@@ -169,6 +169,8 @@ export interface AuctionDetail extends AuctionCard, AuctionLiveState {
   originalEndsAt: string;
   softCloseWindowSec: number;
   softCloseExtendSec: number;
+  /** When false, feed entries carry bidder names while the auction is live. */
+  maskBidders: boolean;
   closedAt: string | null;
   sellerLocation: string;
   amendments: Amendment[];

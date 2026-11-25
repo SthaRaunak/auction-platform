@@ -142,6 +142,7 @@ export function LotView({ detail, similar, comments, me }: { detail: AuctionDeta
               <span className="tag tag-neutral">{shipLabel(i18n, detail)}</span>
               {detail.emdAmount && <span className="tag tag-neutral">{t('lot.deposit', { amount: money(detail.emdAmount) })}</span>}
               {state.hasReserve && <span className="tag tag-neutral">{t(state.reserveMet ? 'lot.reserveMet' : 'lot.reservePrice')}</span>}
+              {!detail.maskBidders && <span className="tag tag-neutral">{t('lot.publicBidders')}</span>}
               {detail.amendments.length > 0 && <span className="tag tag-warn">{t('lot.amended')}</span>}
             </div>
             {detail.amendments.length > 0 && <Amendments items={detail.amendments} />}
@@ -151,7 +152,7 @@ export function LotView({ detail, similar, comments, me }: { detail: AuctionDeta
 
           {detail.viewer.review && <ReviewForm auctionId={detail.id} {...detail.viewer.review} />}
 
-          <BidFeed feed={feed} freshKeys={freshKeys} viewerNo={viewerNo} connection={connection} live={live} bidCount={state.bidCount} resultHref={`/lots/${detail.id}/result`} />
+          <BidFeed feed={feed} freshKeys={freshKeys} viewerNo={viewerNo} connection={connection} live={live} bidCount={state.bidCount} masked={detail.maskBidders} resultHref={`/lots/${detail.id}/result`} />
 
           <section className="card !gap-3 !p-4" aria-labelledby="details-title">
             <h2 id="details-title" className="k">

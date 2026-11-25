@@ -80,17 +80,17 @@ function liveStateOf(a: AuctionRow, res: Resolution, numbers: Map<string, number
   };
 }
 
-/** Identities are revealed once the auction is no longer live (E3/E5). */
-async function namesIfEnded(a: AuctionRow, ledger: LedgerBid[]): Promise<Names> {
-  if (a.status === 'live') return null;
-  return getUserNames(ledger.map((b) => b.bidderId));
+/** Names are shown once the auction is no longer live, or throughout if the seller chose public bidders (E3/E5). */
+async function visibleNames(a: AuctionRow, bidderIds: string[]): Promise<Names> {
+  if (a.status === 'live' && a.maskBidders) return null;
+  return getUserNames(bidderIds);
 }
 
 async function snapshot(ex: Executor, a: AuctionRow) {
   const ledger = toLedger(await listBids(ex, a.id));
   const res = resolve(ledger, rulesOf(a));
   const numbers = bidderNumbers(ledger);
-  const names = await namesIfEnded(a, ledger);
+  const names = await visibleNames(a, ledger.map((b) => b.bidderId));
   const feed = toFeedEntries(deriveFeed(ledger, rulesOf(a)), numbers, names).slice(-FEED_LIMIT).reverse();
   return { ledger, res, numbers, state: liveStateOf(a, res, numbers, names), feed };
 }
@@ -181,9 +181,9 @@ export async function placeBid(user: UserRow, auctionId: string, input: PlaceBid
 
       const numbers = bidderNumbers([...ledger, bid]);
       const state = liveStateOf(updated, after, numbers, null);
-      const events: NewOutboxEvent[] = [
-        { topic: 'auction.state', aggregateId: auctionId, payload: { state, feed: toFeedEntries(feedForBid(before, after, bid), numbers, null) } },
-      ];
+      const items = feedForBid(before, after, bid);
+      const names = await visibleNames(updated, items.map((f) => f.bidderId));
+      const events: NewOutboxEvent[] = [{ topic: 'auction.state', aggregateId: auctionId, payload: { state, feed: toFeedEntries(items, numbers, names) } }];
       if (before.leaderId && before.leaderId !== after.leaderId) {
         events.push({ topic: 'auction.outbid', aggregateId: auctionId, payload: { userId: before.leaderId, title: a.title, price: after.price } });
       }
@@ -309,6 +309,7 @@ export async function getAuctionDetail(auctionId: string, viewerUser: UserRow | 
     originalEndsAt: a.originalEndsAt.toISOString(),
     softCloseWindowSec: a.softCloseWindowSec,
     softCloseExtendSec: a.softCloseExtendSec,
+    maskBidders: a.maskBidders,
     closedAt: a.closedAt?.toISOString() ?? null,
     sellerLocation: a.location,
     amendments,

@@ -44,6 +44,7 @@ export function AuctionForm({ existing }: { existing?: AuctionDetail }) {
   const [flatStep, setFlatStep] = useState(existing?.incrementBands.length === 1 ? String(toMajor(existing.incrementBands[0].step)) : '100');
   const [softWindow, setSoftWindow] = useState(String(existing?.softCloseWindowSec ?? 120));
   const [softExtend, setSoftExtend] = useState(String(existing?.softCloseExtendSec ?? 120));
+  const [maskBidders, setMaskBidders] = useState(existing?.maskBidders ?? true);
 
   const [uploading, setUploading] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -89,6 +90,7 @@ export function AuctionForm({ existing }: { existing?: AuctionDetail }) {
       endsAt: existing || endsAt ? new Date(endsAt).toISOString() : new Date(Date.now() + days * 86_400_000).toISOString(),
       softCloseWindowSec: Number(softWindow),
       softCloseExtendSec: Number(softExtend),
+      maskBidders,
     };
   };
 
@@ -108,7 +110,7 @@ export function AuctionForm({ existing }: { existing?: AuctionDetail }) {
         title: existing.title, titleNe: existing.titleNe, description: existing.description, descriptionNe: existing.descriptionNe, category: existing.category, brand: existing.brand, condition: existing.condition,
         specs: existing.specs, images: existing.images, delivery: existing.delivery, shippingCost: existing.shippingCost, location: existing.location,
         startPrice: existing.startPrice, emdAmount: existing.emdAmount, incrementBands: existing.incrementBands, endsAt: existing.endsAt,
-        softCloseWindowSec: existing.softCloseWindowSec, softCloseExtendSec: existing.softCloseExtendSec,
+        softCloseWindowSec: existing.softCloseWindowSec, softCloseExtendSec: existing.softCloseExtendSec, maskBidders: existing.maskBidders,
       };
       const patch = Object.fromEntries(
         Object.entries(body).filter(([k, v]) => {
@@ -365,6 +367,18 @@ export function AuctionForm({ existing }: { existing?: AuctionDetail }) {
           </div>
         </div>
         <p className="hint">{t('form.softHint')}</p>
+        <div>
+          <label className="chk">
+            <input type="checkbox" checked={maskBidders} disabled={locked('maskBidders')} onChange={(e) => setMaskBidders(e.target.checked)} aria-describedby="mask-hint" />
+            <i />
+            <span>
+              {t('form.maskBidders')} <LockMark show={frozen} />
+            </span>
+          </label>
+          <p id="mask-hint" className="hint">
+            {t('form.maskBiddersHint')}
+          </p>
+        </div>
       </Section>
 
       {error && (

@@ -50,6 +50,8 @@ export const auctionCreateInput = z.object({
   endsAt: z.iso.datetime({ offset: true }),
   softCloseWindowSec: z.number().int().min(0).max(3600).optional(),
   softCloseExtendSec: z.number().int().min(0).max(3600).optional(),
+  /** false = bidder names are public in the live bid history (maximums stay sealed either way). Default true. */
+  maskBidders: z.boolean().optional(),
 });
 export type AuctionCreateInput = z.infer<typeof auctionCreateInput>;
 
@@ -64,7 +66,7 @@ export type AuctionUpdateInput = z.infer<typeof auctionUpdateInput>;
 export const MATERIAL_FIELDS = [
   'title', 'titleNe', 'category', 'brand', 'condition', 'specs', 'delivery', 'shippingCost', 'location',
   'startPrice', 'reservePrice', 'incrementBands', 'emdAmount', 'startsAt', 'endsAt',
-  'softCloseWindowSec', 'softCloseExtendSec',
+  'softCloseWindowSec', 'softCloseExtendSec', 'maskBidders',
 ] as const satisfies readonly (keyof AuctionCreateInput)[];
 export type MaterialField = (typeof MATERIAL_FIELDS)[number];
 

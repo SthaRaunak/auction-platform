@@ -64,6 +64,8 @@ export const auctions = pgTable(
     originalEndsAt: timestamp({ withTimezone: true, precision: 3 }).notNull(),
     softCloseWindowSec: integer().notNull().default(120),
     softCloseExtendSec: integer().notNull().default(120),
+    /** Show bidders as "Bidder #N" while live (E5). The seller may opt out; names are always revealed at close. */
+    maskBidders: boolean().notNull().default(true),
 
     status: auctionStatusEnum().notNull().default('live'),
     /** Moderator freeze: off the listings and closed to bids, pending review. */

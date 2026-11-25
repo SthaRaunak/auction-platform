@@ -11,6 +11,7 @@ function show(i18n: I18n, field: string, v: unknown): string {
   if (MONEY_FIELDS.has(field) && typeof v === 'number') return i18n.money(v);
   if ((field === 'startsAt' || field === 'endsAt') && typeof v === 'string') return i18n.fullStamp(v);
   if (field === 'images' && Array.isArray(v)) return i18n.t('amend.photos', { count: v.length });
+  if (field === 'maskBidders') return i18n.t(v ? 'amend.maskedOn' : 'amend.maskedOff');
   if (typeof v === 'string') return v.length > 140 ? `${v.slice(0, 140)}…` : v;
   return JSON.stringify(v);
 }

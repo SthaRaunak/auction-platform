@@ -156,7 +156,8 @@
     "payment": "Bank deposit voucher or connectIPS · 48 hours to pay after the auction closes",
     "similar": "You might also like",
     "left": "<time></time> left · {bids}",
-    "englishOnly": "This seller hasn’t added a Nepali description, so it’s shown in English."
+    "englishOnly": "This seller hasn’t added a Nepali description, so it’s shown in English.",
+    "publicBidders": "Bidder names public"
   },
   "bid": {
     "winningBid": "Winning bid",
@@ -212,7 +213,8 @@
     "copied": "Link copied",
     "share": "Share",
     "voidedReason": "This auction was voided by a moderator: {reason} All bids are void and deposits refunded.",
-    "pausedReason": "Bidding is paused while a moderator reviews this lot: {reason}"
+    "pausedReason": "Bidding is paused while a moderator reviews this lot: {reason}",
+    "publicNames": "Bidder names are public on this lot — yours will appear in the bid history when you bid."
   },
   "feed": {
     "title": "Bid history",
@@ -226,7 +228,8 @@
     "autoBid": "Auto bid",
     "bid": "Bid",
     "liveNote": "{bids} so far. Bidders are numbered, and maximums stay sealed until the auction ends — then the full log is published.",
-    "fullLog": "See the full published bid log ({bids})"
+    "fullLog": "See the full published bid log ({bids})",
+    "liveNotePublic": "{bids} so far. Bidder names are public on this lot; maximums stay sealed until the auction ends — then the full log is published."
   },
   "gallery": {
     "photoAlt": "{title} — photo {n}",
@@ -270,8 +273,11 @@
       "startsAt": "Start time",
       "endsAt": "End time",
       "softCloseWindowSec": "Soft-close window",
-      "softCloseExtendSec": "Soft-close extension"
-    }
+      "softCloseExtendSec": "Soft-close extension",
+      "maskBidders": "Bidder names"
+    },
+    "maskedOn": "Names hidden",
+    "maskedOff": "Names public"
   },
   "comments": {
     "title": "Questions & comments",
@@ -555,7 +561,9 @@
     "saving": "Saving…",
     "save": "Save changes",
     "publish": "Publish auction",
-    "locked": "Locked after first bid"
+    "locked": "Locked after first bid",
+    "maskBidders": "Hide bidder names while the auction runs",
+    "maskBiddersHint": "Bidders appear as “Bidder #1”, “Bidder #2”… until it ends. Untick to show their names live instead. Maximum bids stay sealed either way, and names are published when it closes."
   },
   "auth": {
     "signInLead": "Welcome back. You pay nothing unless you win.",
@@ -617,7 +625,7 @@
       "transparency": {
         "short": "Sealed while live, published after",
         "title": "Sealed while live, published after",
-        "p1": "While an auction runs, bidders appear as “Bidder #1”, “Bidder #2”… and maximums stay sealed. When it ends we publish a permanent record: the winner, final price, every bid with each bidder’s maximum, the times, and any amendments.",
+        "p1": "While an auction runs, bidders normally appear as “Bidder #1”, “Bidder #2”… — a seller can choose to show names instead, and the lot page says so before you bid. Maximums always stay sealed. When it ends we publish a permanent record: the winner, final price, every bid with each bidder’s maximum, the times, and any amendments.",
         "p2": "Bids can never be edited or deleted. Each one is chained to the one before it with a cryptographic hash, and the published record shows whether the chain verifies — so anyone can tell if the log was tampered with."
       },
       "edits": {

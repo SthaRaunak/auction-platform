@@ -1,0 +1,1 @@
+ALTER TABLE "auctions" ADD COLUMN "mask_bidders" boolean DEFAULT true NOT NULL;

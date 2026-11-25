@@ -168,7 +168,7 @@ async function main() {
     { seller: 'municipal', photo: 'vacant land', title: 'Commercial land, 4 ropani — 30-year lease', category: 'land-property', condition: 'new', startPrice: rupees(5_60_00_000), emdAmount: rupees(56_00_000),
       incrementBands: [{ below: null, step: rupees(1_00_000) }], endsInMin: 60 * 9,
       qty: '4 ropani (≈ 2,035 sq m)', extraSpecs: [{ label: 'Kitta no.', value: '1124' }, { label: 'Permitted use', value: 'Commercial, per municipal building bylaws' }, { label: 'Tenure', value: '30-year lease, renewable' }] },
-    { seller: 'municipal', photo: 'small shop', title: 'Shop no. 14, municipal market complex — 10-year lease', category: 'land-property', condition: 'new', startPrice: rupees(36_00_000), emdAmount: rupees(3_60_000), endsInMin: 18, maxes: [37_00_000, 42_00_000],
+    { seller: 'municipal', photo: 'small shop', title: 'Shop no. 14, municipal market complex — 10-year lease', category: 'land-property', maskBidders: false, condition: 'new', startPrice: rupees(36_00_000), emdAmount: rupees(3_60_000), endsInMin: 18, maxes: [37_00_000, 42_00_000],
       qty: '1 shop, 28 sq m', extraSpecs: [{ label: 'Floor', value: 'Ground floor, road-facing' }, { label: 'Monthly rent', value: 'Rs. 8,400 + VAT' }] },
 
     // Timber & forest produce
@@ -183,7 +183,7 @@ async function main() {
       qty: '6,35,000 cu ft', extraSpecs: [{ label: 'Conditions', value: 'Per the approved IEE; manual collection only, no excavators in the riverbed' }] },
 
     // Licences & leases
-    { seller: 'transport', photo: 'parking lot', title: 'Parking management contract, city bus park — 3 years', category: 'licences', condition: 'new', startPrice: rupees(28_80_000), emdAmount: rupees(2_88_000), endsInMin: 27, maxes: [29_20_000, 30_80_000, 32_40_000],
+    { seller: 'transport', photo: 'parking lot', title: 'Parking management contract, city bus park — 3 years', category: 'licences', maskBidders: false, condition: 'new', startPrice: rupees(28_80_000), emdAmount: rupees(2_88_000), endsInMin: 27, maxes: [29_20_000, 30_80_000, 32_40_000],
       qty: '1 contract (420 two-wheeler, 60 car bays)', extraSpecs: [{ label: 'Bid basis', value: 'Total fee for 3 years' }] },
     { seller: 'dao', photo: 'canteen', title: 'Canteen operation, District Administration complex — 2 years', category: 'licences', condition: 'new', startPrice: rupees(9_60_000), endsInMin: 60 * 10,
       qty: '1 licence' },
