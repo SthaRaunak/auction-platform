@@ -197,7 +197,7 @@
     "outbidMax": "You’ve been outbid — your maximum was {amount}. Raise it to get back on top.",
     "reserveMetNote": "Reserve met — this lot will sell.",
     "reserveNotYet": "Reserve not met yet — the seller has set a minimum sale price.",
-    "signIn": "<signin>Sign in</signin> or <register>create an account</register> to bid. You pay nothing unless you win.",
+    "signIn": "<signin>Sign in</signin> or <register>create an account</register> to bid.",
     "verifyEmail": "Confirm your email address to bid — check your inbox for the link (or resend it from the bar at the top).",
     "ownLot": "This is your lot — sellers can’t bid on their own items. <edit>Edit listing</edit>",
     "ownLotLocked": " (key details are locked now that bids exist).",
