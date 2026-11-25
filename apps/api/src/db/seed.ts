@@ -41,7 +41,8 @@ async function main() {
   await person('mod2@bidwell.test', 'Bikash Adhikari', 'moderator');
   await person('admin@bidwell.test', 'Admin Desk', 'admin');
 
-  // Sellers are disposing offices — divisions, municipalities, customs, forest offices.
+  // Sellers are disposing offices — divisions, municipalities, customs, forest offices — and banks
+  // auctioning collateral to recover defaulted loans (the state-owned RBB, NBL and ADBL, and a private bank).
   // `code` prefixes their auction (लिलाम) notice numbers, which run on the Bikram Sambat fiscal year.
   const sellers = {
     roads: { user: await person('roads.pokhara@bidwell.test', 'Road Division Office, Pokhara'), city: 'Pokhara', cityNe: 'पोखरा', code: 'RDO/PKR' },
@@ -51,7 +52,12 @@ async function main() {
     forest: { user: await person('dfo.chitwan@bidwell.test', 'Division Forest Office, Chitwan'), city: 'Bharatpur', cityNe: 'भरतपुर', code: 'DFO/CTN' },
     dao: { user: await person('dao.kaski@bidwell.test', 'District Administration Office, Kaski'), city: 'Pokhara', cityNe: 'पोखरा', code: 'DAO/KSK' },
     health: { user: await person('hospital.dhading@bidwell.test', 'District Hospital Stores, Dhading'), city: 'Dhading Besi', cityNe: 'धादिङबेसी', code: 'DH/DHD' },
+    rbb: { user: await person('recovery.rbb@bidwell.test', 'Rastriya Banijya Bank, Recovery Department'), city: 'Kathmandu', cityNe: 'काठमाडौं', code: 'RBB/REC' },
+    nbl: { user: await person('biratnagar.nbl@bidwell.test', 'Nepal Bank Limited, Biratnagar Branch'), city: 'Biratnagar', cityNe: 'विराटनगर', code: 'NBL/BRT' },
+    adbl: { user: await person('butwal.adbl@bidwell.test', 'Agricultural Development Bank, Butwal Branch'), city: 'Butwal', cityNe: 'बुटवल', code: 'ADBL/BTW' },
+    nabil: { user: await person('recovery.nabil@bidwell.test', 'Nabil Bank, Asset Recovery Unit'), city: 'Lalitpur', cityNe: 'ललितपुर', code: 'NABIL/ARU' },
   };
+  const BANKS = new Set<keyof typeof sellers>(['rbb', 'nbl', 'adbl', 'nabil']);
   // Bidders are VAT/PAN-registered firms and individual citizens.
   const bidders = await Promise.all(
     ['Shrestha Metal Udhyog', 'Himalayan Recyclers Pvt. Ltd.', 'Sita Gurung', 'Tamang Auto Traders', 'Green Valley E-Waste Pvt. Ltd.', 'Ram Bahadur Thapa'].map((n, i) =>
@@ -79,6 +85,16 @@ async function main() {
     `यो लट प्रचलित सरकारी आर्थिक कार्यविधि नियमअनुसार “जस्तो छ, जहाँ छ” को आधारमा सार्वजनिक लिलामबाट बिक्री गरिनेछ। पूर्वसूचना दिई कार्यालय खुला रहने दिन (आइतबार–शुक्रबार) बिहान १०:०० देखि दिउँसो ३:०० बजेसम्म ${city} स्थित परिसरमा निरीक्षण गर्न सकिनेछ। ` +
     `सफल बोलकर्ताले बिक्री निर्णय भएको १५ दिनभित्र बाँकी रकम जम्मा गर्नुपर्नेछ र भुक्तानी भएको १५ दिनभित्र आफ्नै खर्च र जोखिममा लट उठाइसक्नुपर्नेछ। ` +
     `मूल्य अभिवृद्धि कर (१३%) तथा अन्य लागू हुने कर खरिदकर्ताले तिर्नुपर्नेछ। हस्तान्तरणका बेला स्थायी लेखा नम्बर (PAN/VAT) दर्ता प्रमाणपत्र अनिवार्य छ।`;
+
+  // Banks sell under their own recovery terms rather than the government disposal rules.
+  const bankTerms = (city: string) =>
+    `Mortgaged or repossessed asset sold by public auction to recover a defaulted loan, under the Banks and Financial Institutions Act, 2073 and the bank’s recovery procedure. Inspection on banking days (Sunday–Friday), 10:00–15:00, by appointment with the ${city} recovery desk. ` +
+    `The successful bidder must pay the balance within 7 days of the bank’s sale approval; the bank then completes the ownership transfer (land revenue or transport office) at the buyer’s cost. ` +
+    `If the borrower settles the full dues before approval, the auction is cancelled and deposits are refunded.`;
+  const bankTermsNe = (city: string) =>
+    `भाखा नाघेको कर्जा असुलीका लागि बैंक तथा वित्तीय संस्था सम्बन्धी ऐन, २०७३ र बैंकको असुली कार्यविधिअनुसार धितो वा कब्जामा लिइएको सम्पत्ति सार्वजनिक लिलामबाट बिक्री गरिनेछ। बैंकिङ दिन (आइतबार–शुक्रबार) बिहान १०:०० देखि दिउँसो ३:०० बजेसम्म ${city} स्थित असुली शाखासँग समय मिलाई निरीक्षण गर्न सकिनेछ। ` +
+    `सफल बोलकर्ताले बैंकले बिक्री स्वीकृत गरेको ७ दिनभित्र बाँकी रकम तिर्नुपर्नेछ; त्यसपछि बैंकले खरिदकर्ताकै खर्चमा स्वामित्व हस्तान्तरण (मालपोत वा यातायात कार्यालयमा) गराउनेछ। ` +
+    `स्वीकृतिअघि ऋणीले सम्पूर्ण बक्यौता चुक्ता गरेमा लिलाम रद्द हुनेछ र धरौटी फिर्ता गरिनेछ।`;
 
   // Nepali titles, keyed by the English one. A few lots deliberately have none,
   // to show the web app falling back to English.
@@ -115,9 +131,18 @@ async function main() {
     'Tata Sumo (2007), condemned': 'टाटा सुमो (२००७), काम नलाग्ने',
     'Confiscated LED televisions, 46 units': 'जफत गरिएका एलईडी टेलिभिजन, ४६ थान',
     'Hospital beds (manual), 30 units': 'अस्पतालका बेड (म्यानुअल), ३० थान',
+    'Mortgaged house, 2½ storeys on 4 aana — Budhanilkantha': 'धितोमा रहेको साढे दुई तले घर, ४ आना — बूढानीलकण्ठ',
+    'Repossessed Toyota Hiace van (2016)': 'बैंकले कब्जामा लिएको टोयोटा हायस भ्यान (२०१६)',
+    'Commercial building with land, 1 bigha 2 kattha — Biratnagar': 'जग्गासहितको व्यावसायिक भवन, १ बिघा २ कट्ठा — विराटनगर',
+    'Rice mill machinery, complete line': 'चामल मिलका मेसिनरी, पूरा सेट',
+    'Agricultural land, 2 bigha — Rupandehi': 'खेतीयोग्य जग्गा, २ बिघा — रुपन्देही',
+    'Mahindra tractor with trailer (2018)': 'ट्रेलरसहितको महिन्द्रा ट्र्याक्टर (२०१८)',
+    'Apartment, 3 BHK, 1,450 sq ft — Lalitpur': 'अपार्टमेन्ट, ३ बीएचके, १,४५० वर्ग फिट — ललितपुर',
+    'Repossessed Hyundai Creta (2019)': 'बैंकले कब्जामा लिएको हुन्डाई क्रेटा (२०१९)',
   };
-  const nepali = (title: string, city: string) =>
-    NEPALI_TITLES[title] ? { titleNe: NEPALI_TITLES[title], descriptionNe: asIsNe(city) } : {};
+  const terms = (seller: keyof typeof sellers) => (BANKS.has(seller) ? { en: bankTerms, ne: bankTermsNe } : { en: asIs, ne: asIsNe });
+  const nepali = (title: string, seller: keyof typeof sellers) =>
+    NEPALI_TITLES[title] ? { titleNe: NEPALI_TITLES[title], descriptionNe: terms(seller).ne(sellers[seller].cityNe) } : {};
 
   const lots: Lot[] = [
     // Vehicles
@@ -205,6 +230,25 @@ async function main() {
     // Medical & lab equipment
     { seller: 'health', photo: 'x-ray machine', title: 'X-ray machine, 300 mA (condemned)', category: 'medical', brand: 'Siemens', condition: 'fair', startPrice: rupees(2_80_000), endsInMin: 60 * 10, maxes: [2_90_000],
       qty: '1 unit', extraSpecs: [{ label: 'Eligibility', value: 'Agencies registered with the radiation regulator only (source removed)' }] },
+
+    // Bank collateral — loan-recovery auctions
+    { seller: 'rbb', photo: 'house exterior', title: 'Mortgaged house, 2½ storeys on 4 aana — Budhanilkantha', category: 'land-property', condition: 'like_new', startPrice: rupees(1_85_00_000), emdAmount: rupees(18_50_000), endsInMin: 60 * 30, maxes: [1_86_00_000],
+      qty: '1 house, 4 aana (≈ 127 sq m)', extraSpecs: [{ label: 'Kitta no.', value: '2217' }, { label: 'Bank valuation', value: 'Rs. 2,10,00,000 (fair market value)' }, { label: 'Title', value: 'Lalpurja held by the bank; transferred after full payment' }] },
+    { seller: 'rbb', photo: 'white van', title: 'Repossessed Toyota Hiace van (2016)', category: 'vehicles', brand: 'Toyota', condition: 'like_new', startPrice: rupees(18_50_000), emdAmount: rupees(1_85_000), endsInMin: 63, maxes: [19_00_000, 19_80_000],
+      qty: '1 vehicle', extraSpecs: [{ label: 'Registration', value: 'Ba 3 Kha ••48' }, { label: 'Odometer', value: '1,42,000 km' }, { label: 'Papers', value: 'Bluebook with the bank; hire-purchase lien removed on sale' }] },
+    { seller: 'nbl', photo: 'commercial building', title: 'Commercial building with land, 1 bigha 2 kattha — Biratnagar', category: 'land-property', condition: 'like_new', startPrice: rupees(4_20_00_000), emdAmount: rupees(42_00_000),
+      incrementBands: [{ below: null, step: rupees(1_00_000) }], endsInMin: 60 * 52,
+      qty: '1 bigha 2 kattha with a 3-storey building', extraSpecs: [{ label: 'Frontage', value: 'Main road, 18 m' }, { label: 'Bank valuation', value: 'Rs. 4,80,00,000' }] },
+    { seller: 'nbl', photo: 'rice mill', title: 'Rice mill machinery, complete line', category: 'machinery', condition: 'good', startPrice: rupees(32_00_000), emdAmount: rupees(3_20_000), endsInMin: 60 * 18, maxes: [32_50_000],
+      qty: '1 line (huller, polisher, grader, 2 dryers)', extraSpecs: [{ label: 'Capacity', value: '4 MT per hour' }, { label: 'Condition', value: 'Idle since 2081; motors tested working' }] },
+    { seller: 'adbl', photo: 'farmland', title: 'Agricultural land, 2 bigha — Rupandehi', category: 'land-property', condition: 'new', startPrice: rupees(96_00_000), emdAmount: rupees(9_60_000), endsInMin: 60 * 44,
+      qty: '2 bigha (≈ 1.35 ha)', extraSpecs: [{ label: 'Kitta nos.', value: '412, 413' }, { label: 'Irrigation', value: 'Canal-irrigated, two crops a year' }] },
+    { seller: 'adbl', photo: 'tractor', title: 'Mahindra tractor with trailer (2018)', category: 'vehicles', brand: 'Mahindra', condition: 'like_new', startPrice: rupees(9_40_000), endsInMin: 29, maxes: [9_60_000, 10_10_000],
+      qty: '1 tractor, 1 trailer', extraSpecs: [{ label: 'Hours', value: '3,900 hrs' }, { label: 'Registration', value: 'Lu 1 Ta ••09' }] },
+    { seller: 'nabil', photo: 'apartment building', title: 'Apartment, 3 BHK, 1,450 sq ft — Lalitpur', category: 'land-property', condition: 'like_new', startPrice: rupees(1_35_00_000), emdAmount: rupees(13_50_000), endsInMin: 60 * 26,
+      qty: '1 apartment, 7th floor', extraSpecs: [{ label: 'Parking', value: '1 car bay' }, { label: 'Society dues', value: 'Cleared to Kartik 2083 by the bank' }] },
+    { seller: 'nabil', photo: 'suv car', title: 'Repossessed Hyundai Creta (2019)', category: 'vehicles', brand: 'Hyundai', condition: 'like_new', startPrice: rupees(26_00_000), emdAmount: rupees(2_60_000), endsInMin: 60 * 3, maxes: [26_50_000, 27_40_000, 28_10_000],
+      qty: '1 vehicle', extraSpecs: [{ label: 'Registration', value: 'Ba 22 Pa ••61' }, { label: 'Odometer', value: '68,400 km' }] },
   ];
 
   // Demo stock photos bypass the upload-only rule on purpose: real listings must
@@ -226,8 +270,8 @@ async function main() {
     const seller = sellers[lot.seller];
     const { seller: _s, photo, endsInMin, maxes, qty, extraSpecs, ...input } = lot;
     const a = await createAuction(seller.user, {
-      description: asIs(seller.city),
-      ...nepali(lot.title, seller.cityNe),
+      description: terms(lot.seller).en(seller.city),
+      ...nepali(lot.title, lot.seller),
       images: [],
       delivery: 'local_pickup',
       location: seller.city,
@@ -235,7 +279,8 @@ async function main() {
       specs: [
         { label: 'Notice no.', value: `${seller.code}/Lilam/2083-84/${String(++notice).padStart(3, '0')}` },
         ...(qty ? [{ label: 'Quantity', value: qty }] : []),
-        { label: 'Lying at', value: `${seller.user.displayName.split(',')[0]} yard, ${seller.city}` },
+        // Land and buildings are where they are; movable bank collateral sits in the bank's recovery yard.
+        ...(lot.category === 'land-property' ? [] : [{ label: 'Lying at', value: BANKS.has(lot.seller) ? `Bank recovery yard, ${seller.city}` : `${seller.user.displayName.split(',')[0]} yard, ${seller.city}` }]),
         ...(extraSpecs ?? []),
       ],
       endsAt: inMinutes(endsInMin),
@@ -271,7 +316,7 @@ async function main() {
   for (const [seller, title, category, max, winner, sellerStars, sellerReview, buyerStars, buyerReview, photo] of completed) {
     const dept = sellers[seller];
     const a = await createAuction(dept.user, {
-      title, category, condition: 'fair', description: asIs(dept.city), ...nepali(title, dept.cityNe), images: [], delivery: 'local_pickup',
+      title, category, condition: 'fair', description: asIs(dept.city), ...nepali(title, seller), images: [], delivery: 'local_pickup',
       specs: [{ label: 'Notice no.', value: `${dept.code}/Lilam/2083-84/${String(++notice).padStart(3, '0')}` }],
       location: dept.city, startPrice: rupees(Math.round(max * 0.7)), endsAt: inMinutes(30),
     } as AuctionCreateInput);
@@ -309,14 +354,20 @@ async function main() {
   const spam = await postComment(bidders[4], ids[11], 'Cheap JCB spare parts available, call 98XXXXXXXX');
   await removeComment(moderator, spam.id, 'Advertising is not allowed in lot comments.');
   await thread(11, [[bidders[1], 'What is the condition of the tyres and the battery?']]);
+  const lotIndex = (title: string) => lots.findIndex((l) => l.title === title);
+  await thread(lotIndex('Mortgaged house, 2½ storeys on 4 aana — Budhanilkantha'), [
+    [bidders[2], 'Does the bank hand over the lalpurja, or do I deal with the borrower?'],
+    [sellers.rbb.user, 'The bank holds the lalpurja and completes the rajinama at the land revenue office after full payment. You never deal with the borrower. Registration fees are the buyer’s.'],
+  ]);
+  await thread(lotIndex('Repossessed Hyundai Creta (2019)'), [[bidders[3], 'Is there any pending traffic fine or tax on the vehicle?']]);
 
   await db.execute(sql`insert into watchlist (user_id, auction_id) select ${anjali.id}, id from auctions where id in (${sql.join([ids[2], ids[0], ids[4], ids[6], ids[11], ids[17], ids[22]].map((i) => sql`${i}`), sql`, `)})`);
   await stock.save();
   await flushOutbox();
   if (!stock.available) console.log('\nNo UNSPLASH_ACCESS_KEY and no cached photos — lots use placeholder images.');
-  console.log(`\nSeeded ${lots.length} live government lots and ${completed.length} completed disposals.\n`);
+  console.log(`\nSeeded ${lots.length} live lots (${lots.filter((l) => BANKS.has(l.seller)).length} from banks) and ${completed.length} completed disposals.\n`);
   console.log(`Sign in as anjali@bidwell.test / ${PASSWORD} (bidder), mod@bidwell.test (moderator), admin@bidwell.test (admin).`);
-  console.log(`Departments sign in with their own addresses (e.g. roads.pokhara@bidwell.test). Every seeded account uses the same password.`);
+  console.log(`Departments and banks sign in with their own addresses (e.g. roads.pokhara@bidwell.test, recovery.rbb@bidwell.test). Every seeded account uses the same password.`);
 }
 
 main()
