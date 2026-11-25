@@ -61,6 +61,14 @@ describe('edits after the first bid (A6)', () => {
     expect((await listAuctions(listAuctionsQuery.parse({ q: 'मोबाइल' }), null)).items.map((c) => c.id)).toEqual([a.id]);
   });
 
+  it('listing search matches the seller’s name', async () => {
+    const bank = await makeUser({ displayName: 'Rastriya Banijya Bank, Recovery Department' });
+    const other = await makeUser();
+    const a = await makeAuction(bank);
+    await makeAuction(other);
+    expect((await listAuctions(listAuctionsQuery.parse({ q: 'banijya' }), null)).items.map((c) => c.id)).toEqual([a.id]);
+  });
+
   it('only the seller can edit', async () => {
     const seller = await makeUser();
     const other = await makeUser();
