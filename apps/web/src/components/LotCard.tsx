@@ -42,10 +42,16 @@ export function LotCard({ lot, signedIn }: { lot: AuctionCard; signedIn: boolean
   const title = i18n.pick(lot.title, lot.titleNe);
   const href = `/lots/${lot.id}`;
   return (
-    <article className={`card !gap-0 !p-0 ${flash ? 'flash' : ''}`}>
+    <article className={`card group !gap-0 !p-0 ${flash ? 'flash' : ''}`}>
       <div className="relative">
-        <Link href={href} tabIndex={-1} aria-hidden>
-          <Photo src={lot.image} alt={title} label={t('card.photoLabel', { lotNo: i18n.digits(lot.lotNo) })} />
+        {/* The photo eases in slightly on hover or keyboard focus; the overlays stay put. Skipped for reduced motion. */}
+        <Link href={href} tabIndex={-1} aria-hidden className="block overflow-hidden">
+          <Photo
+            src={lot.image}
+            alt={title}
+            label={t('card.photoLabel', { lotNo: i18n.digits(lot.lotNo) })}
+            className="transition-transform duration-500 ease-out motion-safe:group-hover:scale-105 motion-safe:group-focus-within:scale-105"
+          />
         </Link>
         <WatchStar auctionId={lot.id} watched={lot.watched} signedIn={signedIn} title={title} />
         <CountdownChip endsAt={lot.endsAt} status={lot.status} />
